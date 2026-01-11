@@ -190,7 +190,24 @@ scenic-walk/
 
 ## Production Deployment
 
-### Build
+### Automatic Deployment (CI/CD)
+
+This project uses **GitHub Actions** for automatic deployment to **Google Cloud Run**.
+
+Simply push to the `main` branch:
+
+```bash
+git push origin main
+```
+
+The workflow will:
+1. Build a Docker image with the Vite frontend
+2. Push to Google Artifact Registry
+3. Deploy to Cloud Run
+
+**Live URL**: Check the Cloud Run service URL after deployment.
+
+### Manual Build
 
 ```bash
 npm run build
@@ -198,9 +215,9 @@ npm run build
 
 The output will be in the `dist/` directory.
 
-### Deploy
+### Alternative Hosting
 
-Deploy the `dist/` folder to any static hosting:
+You can also deploy the `dist/` folder to any static hosting:
 
 - **Firebase Hosting**: `firebase deploy`
 - **Vercel**: `vercel`

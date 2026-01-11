@@ -78,6 +78,39 @@ VITE_FIREBASE_DATABASE_URL=
 VITE_GOOGLE_MAPS_API_KEY=
 ```
 
+## Deployment
+
+**CI/CD via GitHub Actions** - Pushing to `main` automatically deploys to Google Cloud Run.
+
+### GCP Project
+- Project ID: `scenic-walk-484001`
+- Region: `us-west1`
+- Service: `scenic-walk`
+
+### Infrastructure
+- **Cloud Run**: Hosts the containerized frontend
+- **Artifact Registry**: Stores Docker images at `us-west1-docker.pkg.dev/scenic-walk-484001/scenic-walk`
+- **Workload Identity Federation**: Keyless GitHub → GCP authentication (no service account keys)
+
+### Deployment Files
+- `Dockerfile`: Multi-stage build (node:20 → nginx:alpine)
+- `nginx.conf`: SPA routing + security headers
+- `.github/workflows/deploy.yml`: GitHub Actions workflow
+
+### Manual Deployment (emergency only)
+```bash
+gcloud run deploy scenic-walk \
+  --source . \
+  --region us-west1 \
+  --project scenic-walk-484001 \
+  --allow-unauthenticated
+```
+
+### View Logs
+```bash
+gcloud run services logs read scenic-walk --region us-west1 --project scenic-walk-484001 --limit 50
+```
+
 ## Key Patterns
 
 ### Google Maps Loading
