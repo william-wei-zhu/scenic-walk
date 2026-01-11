@@ -200,7 +200,7 @@ function HomePage({ onCreateEvent, isDarkMode, onToggleDarkMode }: HomePageProps
       {/* Hero Section */}
       <main className="max-w-4xl mx-auto px-4 py-12 text-center">
         <div className="mb-8">
-          <span className="text-7xl">🚶</span>
+          <img src="/logo.png" alt="Scenic Walk" className="w-28 h-28 mx-auto rounded-2xl shadow-lg" />
         </div>
 
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">

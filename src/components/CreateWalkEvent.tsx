@@ -406,7 +406,11 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
             </div>
           ) : filteredEvents.length === 0 ? (
             <div className="bg-white dark:bg-gray-900 rounded-lg p-8 text-center">
-              <div className="text-4xl mb-3">{eventsFilter === 'active' ? '🚶' : '📋'}</div>
+              {eventsFilter === 'active' ? (
+                <img src="/logo.png" alt="" className="w-16 h-16 mx-auto mb-3 rounded-lg opacity-50" />
+              ) : (
+                <div className="text-4xl mb-3">📋</div>
+              )}
               <p className="text-gray-500 dark:text-gray-400">
                 {eventsFilter === 'active' ? 'No active events. Create one above!' : 'No ended events yet.'}
               </p>
