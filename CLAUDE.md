@@ -32,11 +32,12 @@ Routes are handled manually in `src/App.tsx` using `window.location.hash`:
 ```
 src/
 ├── components/
-│   ├── CreateWalkEvent.tsx     # Event creation with route drawing
+│   ├── CreateWalkEvent.tsx     # Event creation with route drawing + PIN confirmation
 │   ├── WalkEventView.tsx       # Main event view (participant/organizer)
 │   ├── WalkMapComponent.tsx    # Google Maps with markers + polylines
 │   ├── LocationBroadcaster.tsx # GPS broadcast controls
 │   ├── OrganizerPinModal.tsx   # PIN entry modal
+│   ├── Toast.tsx               # Toast notifications + useToast hook
 │   └── LoadingSpinner.tsx      # Loading indicator
 ├── hooks/
 │   ├── useGeolocation.ts       # Browser Geolocation API wrapper
@@ -120,6 +121,30 @@ Maps API loaded via script tag in `App.tsx` with callback to `window.initMap`. C
 Toggle stored in localStorage (`darkMode`). Applied via `document.documentElement.classList.add('dark')`.
 
 ### Location Broadcasting
-- **Continuous mode**: Auto-updates location every few seconds while broadcasting
-- **Manual mode**: Single location update per button press
+- **Continuous mode**: Auto-updates location every ~10 seconds while broadcasting
+- **Manual mode** (On-Demand): Single location update per button press
 - Uses `navigator.geolocation.watchPosition()` in useGeolocation hook
+
+### Toast Notifications
+```tsx
+import { Toast, useToast } from './Toast';
+const { toast, showToast, hideToast } = useToast();
+showToast('Link copied!', 'success'); // types: 'success' | 'error' | 'info'
+```
+
+### Status Indicators (Colorblind-Accessible)
+All status indicators use icons + text labels alongside colors:
+- Active: ✓ green icon + "Active" label
+- Stale: ⏱ amber icon + "Stale" label
+- Waiting: ○ gray icon + "Waiting" label
+- Broadcasting: 📡 animated pulse icon
+
+### Form Patterns
+- PIN entry requires confirmation field with real-time validation
+- Selected radio options show highlighted border (`border-blue-500 bg-blue-50`)
+- Broadcast mode renamed: "Continuous Updates" (recommended) / "On-Demand Updates"
+
+### Layout
+- Maps use full-width layout (no max-w constraints)
+- Mobile map height: 65vh, Desktop: flex-1
+- Feature cards on homepage: max-w-6xl
