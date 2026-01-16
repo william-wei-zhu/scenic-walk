@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { WalkMapComponent } from './WalkMapComponent';
 import { OrganizerPinModal } from './OrganizerPinModal';
 import { LocationBroadcaster } from './LocationBroadcaster';
+import { Toast, useToast } from './Toast';
 import { useLiveLocation } from '../hooks';
 import { getWalkEvent, updateWalkEventStatus, clearOrganizerLocation } from '../services/firebase';
 import type { WalkEvent } from '../types';
@@ -30,6 +31,9 @@ export const WalkEventView: React.FC<WalkEventViewProps> = ({
 
   // Live location subscription
   const { location, lastUpdateAgo, isStale } = useLiveLocation(eventId);
+
+  // Toast notifications
+  const { toast, showToast, hideToast } = useToast();
 
   // Fetch event data
   useEffect(() => {
@@ -140,9 +144,9 @@ export const WalkEventView: React.FC<WalkEventViewProps> = ({
       });
     } else {
       navigator.clipboard.writeText(url);
-      // Could use toast here
+      showToast('Link copied!', 'success');
     }
-  }, [eventId, event?.name]);
+  }, [eventId, event?.name, showToast]);
 
   if (isLoading) {
     return (
@@ -189,7 +193,7 @@ export const WalkEventView: React.FC<WalkEventViewProps> = ({
     <div className="h-screen bg-gray-100 dark:bg-gray-950 flex flex-col overflow-hidden">
       {/* Header */}
       <header className="flex-shrink-0 bg-white dark:bg-gray-900 shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-4">
+        <div className="px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {onClose && (
@@ -203,16 +207,27 @@ export const WalkEventView: React.FC<WalkEventViewProps> = ({
               <div>
                 <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">{event.name}</h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {event.route.length} points • {event.broadcastMode === 'continuous' ? 'Auto' : 'Manual'} updates
+                  {event.route.length} points • {event.broadcastMode === 'continuous' ? 'Continuous' : 'On-demand'} updates
                 </p>
               </div>
             </div>
             {isOrganizerVerified && (
               <div className="flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full ${isBroadcasting ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`} />
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  {isBroadcasting ? 'Broadcasting' : 'Not broadcasting'}
-                </span>
+                {isBroadcasting ? (
+                  <>
+                    <span className="w-4 h-4 rounded-full bg-green-500 animate-pulse flex items-center justify-center text-white text-[10px]">📡</span>
+                    <span className="text-sm text-green-600 dark:text-green-400 font-medium">
+                      Broadcasting
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="w-4 h-4 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-[10px]">⏸</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      Paused
+                    </span>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -221,8 +236,8 @@ export const WalkEventView: React.FC<WalkEventViewProps> = ({
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col md:flex-row overflow-hidden">
-        {/* Map - explicit height on mobile */}
-        <div className="h-[50vh] md:h-auto md:flex-1">
+        {/* Map - larger height on mobile, flex-1 on desktop */}
+        <div className="h-[65vh] md:h-auto md:flex-1">
           <WalkMapComponent
             route={event.route}
             organizerLocation={location}
@@ -238,10 +253,21 @@ export const WalkEventView: React.FC<WalkEventViewProps> = ({
             {location ? (
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className={`w-3 h-3 rounded-full ${isStale ? 'bg-amber-500' : 'bg-green-500'}`} />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    {isStale ? 'Location may be outdated' : 'Location active'}
-                  </span>
+                  {isStale ? (
+                    <>
+                      <span className="w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center text-white text-xs">⏱</span>
+                      <span className="text-sm text-amber-700 dark:text-amber-400 font-medium">
+                        Stale
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs">✓</span>
+                      <span className="text-sm text-green-700 dark:text-green-400 font-medium">
+                        Active
+                      </span>
+                    </>
+                  )}
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   Updated {lastUpdateAgo}s ago
@@ -253,9 +279,22 @@ export const WalkEventView: React.FC<WalkEventViewProps> = ({
                 )}
               </div>
             ) : (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Waiting for organizer to start broadcasting...
-              </p>
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-5 h-5 rounded-full bg-gray-400 flex items-center justify-center text-white text-xs animate-pulse">○</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    Waiting for organizer
+                    <span className="inline-flex ml-1">
+                      <span className="animate-bounce" style={{ animationDelay: '0ms' }}>.</span>
+                      <span className="animate-bounce" style={{ animationDelay: '150ms' }}>.</span>
+                      <span className="animate-bounce" style={{ animationDelay: '300ms' }}>.</span>
+                    </span>
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700/50 p-2 rounded">
+                  The organizer will start sharing their location soon. You'll see their position on the map as an orange flag.
+                </p>
+              </div>
             )}
           </div>
 
@@ -317,15 +356,26 @@ export const WalkEventView: React.FC<WalkEventViewProps> = ({
             </div>
           )}
 
+          {/* Event Status Notice */}
+          {!isOrganizerVerified && event.status === 'ended' && (
+            <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 text-center">
+              <div className="text-2xl mb-2">🏁</div>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">This event has ended</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                The route is still visible on the map for reference.
+              </p>
+            </div>
+          )}
+
           {/* Participant Instructions */}
-          {!isOrganizerVerified && (
+          {!isOrganizerVerified && event.status === 'active' && (
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
               <h3 className="font-medium text-blue-800 dark:text-blue-300 mb-2">How to use</h3>
               <ul className="text-sm text-blue-700 dark:text-blue-400 space-y-2">
                 <li>• The orange flag shows the organizer's location</li>
                 <li>• Green marker = route start</li>
                 <li>• Red marker = route end</li>
-                <li>• Location updates automatically</li>
+                <li>• Location updates {event.broadcastMode === 'continuous' ? 'every ~10 seconds' : 'when organizer taps'}</li>
               </ul>
             </div>
           )}
@@ -350,6 +400,14 @@ export const WalkEventView: React.FC<WalkEventViewProps> = ({
         }}
         onSubmit={handlePinSubmit}
         error={pinError || undefined}
+      />
+
+      {/* Toast notifications */}
+      <Toast
+        message={toast.message}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+        type={toast.type}
       />
     </div>
   );

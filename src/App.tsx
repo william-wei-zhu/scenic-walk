@@ -198,29 +198,31 @@ function HomePage({ onCreateEvent, isDarkMode, onToggleDarkMode }: HomePageProps
       </header>
 
       {/* Hero Section */}
-      <main className="max-w-4xl mx-auto px-4 py-12 text-center">
-        <div className="mb-8">
-          <img src="/logo.png" alt="Scenic Walk" className="w-28 h-28 mx-auto rounded-2xl shadow-lg" />
+      <main className="px-4 py-12 text-center">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8">
+            <img src="/logo.png" alt="Scenic Walk" className="w-28 h-28 mx-auto rounded-2xl shadow-lg" />
+          </div>
+
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+            Scenic Walk
+          </h1>
+
+          <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
+            Create walking events and share your live location with participants.
+            Perfect for group walks, tours, and outdoor activities.
+          </p>
+
+          <button
+            onClick={onCreateEvent}
+            className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+          >
+            Create Walk Event
+          </button>
         </div>
 
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-          Scenic Walk
-        </h1>
-
-        <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
-          Create walking events and share your live location with participants.
-          Perfect for group walks, tours, and outdoor activities.
-        </p>
-
-        <button
-          onClick={onCreateEvent}
-          className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
-        >
-          Create Walk Event
-        </button>
-
         {/* Features */}
-        <div className="mt-16 grid md:grid-cols-3 gap-8">
+        <div className="mt-16 grid md:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md">
             <div className="text-4xl mb-4">📍</div>
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">
@@ -253,7 +255,7 @@ function HomePage({ onCreateEvent, isDarkMode, onToggleDarkMode }: HomePageProps
         </div>
 
         {/* How It Works */}
-        <div className="mt-16">
+        <div className="mt-16 max-w-6xl mx-auto">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">
             How It Works
           </h2>

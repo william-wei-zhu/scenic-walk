@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { nanoid } from 'nanoid';
 import { WalkMapComponent } from './WalkMapComponent';
+import { Toast, useToast } from './Toast';
 import { createWalkEvent, getAllWalkEvents } from '../services/firebase';
 import type { Coordinates, WalkEvent } from '../types';
 
@@ -16,6 +17,7 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
   const [route, setRoute] = useState<Coordinates[]>([]);
   const [eventName, setEventName] = useState('');
   const [pin, setPin] = useState('');
+  const [confirmPin, setConfirmPin] = useState('');
   const [broadcastMode, setBroadcastMode] = useState<'continuous' | 'manual'>('continuous');
   const [isCreating, setIsCreating] = useState(false);
   const [createdEvent, setCreatedEvent] = useState<WalkEvent | null>(null);
@@ -25,6 +27,9 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
   const [existingEvents, setExistingEvents] = useState<WalkEvent[]>([]);
   const [eventsFilter, setEventsFilter] = useState<'active' | 'ended'>('active');
   const [isLoadingEvents, setIsLoadingEvents] = useState(true);
+
+  // Toast notifications
+  const { toast, showToast, hideToast } = useToast();
 
   // Fetch existing events on mount
   useEffect(() => {
@@ -70,6 +75,10 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
       setError('Please enter a 4-digit PIN');
       return;
     }
+    if (pin !== confirmPin) {
+      setError('PINs do not match');
+      return;
+    }
     if (route.length < 2) {
       setError('Please draw a route with at least 2 points');
       return;
@@ -103,7 +112,8 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
   // Copy share URL
   const handleCopyUrl = useCallback((url: string) => {
     navigator.clipboard.writeText(url);
-  }, []);
+    showToast('Link copied!', 'success');
+  }, [showToast]);
 
   // Share URL
   const handleShare = useCallback((url: string, name: string) => {
@@ -114,8 +124,9 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
       });
     } else {
       navigator.clipboard.writeText(url);
+      showToast('Link copied!', 'success');
     }
-  }, []);
+  }, [showToast]);
 
   // Show success screen after creation
   if (createdEvent) {
@@ -204,6 +215,12 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
             </button>
           )}
         </div>
+        <Toast
+          message={toast.message}
+          isVisible={toast.isVisible}
+          onClose={hideToast}
+          type={toast.type}
+        />
       </div>
     );
   }
@@ -212,7 +229,7 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
     <div className="h-screen flex flex-col bg-gray-100 dark:bg-gray-950 overflow-hidden">
       {/* Header - Fixed */}
       <header className="flex-shrink-0 bg-white dark:bg-gray-900 shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="px-4 md:px-6 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Create Walk Event</h1>
             <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
@@ -232,12 +249,12 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
 
       {/* Scrollable Content */}
       <main className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto px-4 py-6">
+        <div className="px-4 md:px-6 py-6">
         <div className="grid md:grid-cols-2 gap-6">
           {/* Left: Map and Route Drawing */}
           <div className="space-y-4">
             <div className="bg-white dark:bg-gray-900 rounded-lg shadow overflow-hidden">
-              <div className="h-80">
+              <div className="h-96 md:h-[500px]">
                 <WalkMapComponent
                   route={route}
                   isDrawingMode={true}
@@ -302,6 +319,33 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
                   placeholder="1234"
                   className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 />
+              </div>
+
+              {/* Confirm PIN */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Confirm PIN
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={4}
+                  value={confirmPin}
+                  onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ''))}
+                  placeholder="1234"
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
+                    confirmPin && pin !== confirmPin
+                      ? 'border-red-500 dark:border-red-500'
+                      : 'dark:border-gray-600'
+                  }`}
+                />
+                {confirmPin && pin !== confirmPin && (
+                  <p className="text-xs text-red-500 mt-1">PINs do not match</p>
+                )}
+                {confirmPin && pin === confirmPin && pin.length === 4 && (
+                  <p className="text-xs text-green-600 dark:text-green-400 mt-1">PINs match</p>
+                )}
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   You'll need this PIN to broadcast your location
                 </p>
@@ -310,33 +354,48 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
               {/* Broadcast Mode */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Location Broadcast Mode
+                  Location Update Mode
                 </label>
                 <div className="space-y-2">
-                  <label className="flex items-center gap-3 p-3 border dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <label className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                    broadcastMode === 'continuous'
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      : 'dark:border-gray-600'
+                  }`}>
                     <input
                       type="radio"
                       name="broadcastMode"
                       checked={broadcastMode === 'continuous'}
                       onChange={() => setBroadcastMode('continuous')}
-                      className="text-blue-600"
+                      className="text-blue-600 mt-1"
                     />
                     <div>
-                      <p className="font-medium text-gray-800 dark:text-gray-200">Auto (every 10 sec)</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Location updates automatically</p>
+                      <p className="font-medium text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                        Continuous Updates
+                        <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded">Recommended</span>
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Location shared every 10 seconds automatically. Best for most walks.
+                      </p>
                     </div>
                   </label>
-                  <label className="flex items-center gap-3 p-3 border dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <label className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                    broadcastMode === 'manual'
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      : 'dark:border-gray-600'
+                  }`}>
                     <input
                       type="radio"
                       name="broadcastMode"
                       checked={broadcastMode === 'manual'}
                       onChange={() => setBroadcastMode('manual')}
-                      className="text-blue-600"
+                      className="text-blue-600 mt-1"
                     />
                     <div>
-                      <p className="font-medium text-gray-800 dark:text-gray-200">Manual button</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Tap to update location</p>
+                      <p className="font-medium text-gray-800 dark:text-gray-200">On-Demand Updates</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        You control when to share your location. Better for battery life.
+                      </p>
                     </div>
                   </label>
                 </div>
@@ -438,7 +497,7 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
                     </span>
                   </div>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                    {event.route.length} points • {event.broadcastMode === 'continuous' ? 'Auto' : 'Manual'} mode
+                    {event.route.length} points • {event.broadcastMode === 'continuous' ? 'Continuous' : 'On-demand'}
                   </p>
                   <div className="flex gap-2">
                     <button
