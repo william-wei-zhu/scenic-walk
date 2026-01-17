@@ -272,11 +272,6 @@ export const WalkEventView: React.FC<WalkEventViewProps> = ({
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   Updated {lastUpdateAgo}s ago
                 </p>
-                {location.accuracy && (
-                  <p className="text-xs text-gray-400 dark:text-gray-500">
-                    Accuracy: ±{Math.round(location.accuracy)}m
-                  </p>
-                )}
               </div>
             ) : (
               <div>
@@ -364,19 +359,6 @@ export const WalkEventView: React.FC<WalkEventViewProps> = ({
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 The route is still visible on the map for reference.
               </p>
-            </div>
-          )}
-
-          {/* Participant Instructions */}
-          {!isOrganizerVerified && event.status === 'active' && (
-            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-              <h3 className="font-medium text-green-800 dark:text-green-300 mb-2">How to use</h3>
-              <ul className="text-sm text-green-700 dark:text-green-400 space-y-2">
-                <li>• The orange flag shows the organizer's location</li>
-                <li>• Green marker = route start</li>
-                <li>• Red marker = route end</li>
-                <li>• Location updates {event.broadcastMode === 'continuous' ? 'every ~10 seconds' : 'when organizer taps'}</li>
-              </ul>
             </div>
           )}
 
