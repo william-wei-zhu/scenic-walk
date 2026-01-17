@@ -146,11 +146,10 @@ All status indicators use icons + text labels alongside colors:
 - Broadcasting: 📡 animated pulse icon
 
 ### Form Patterns
-- PIN entry requires confirmation field with real-time validation
-- Selected radio options show highlighted border (`border-green-500 bg-green-50`)
-- Broadcast mode renamed: "Continuous Updates" (recommended) / "On-Demand Updates"
+- Minimal forms: Name + PIN + Create (no confirmation, no mode selection)
+- Broadcast mode defaults to continuous (no user choice needed)
 
 ### Layout
 - Maps use full-width layout (no max-w constraints)
 - Mobile map height: 65vh, Desktop: flex-1
-- Feature cards on homepage: max-w-6xl
+- Homepage: Minimal (logo + tagline + CTA button only)
