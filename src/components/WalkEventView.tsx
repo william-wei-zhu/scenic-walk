@@ -152,7 +152,7 @@ export const WalkEventView: React.FC<WalkEventViewProps> = ({
     return (
       <div className="h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-950">
         <div className="text-center">
-          <div className="animate-spin w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <div className="animate-spin w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">Loading event...</p>
         </div>
       </div>
@@ -172,7 +172,7 @@ export const WalkEventView: React.FC<WalkEventViewProps> = ({
           </p>
           <button
             onClick={() => window.location.hash = '/create'}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
           >
             Create New Event
           </button>
@@ -369,9 +369,9 @@ export const WalkEventView: React.FC<WalkEventViewProps> = ({
 
           {/* Participant Instructions */}
           {!isOrganizerVerified && event.status === 'active' && (
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-              <h3 className="font-medium text-blue-800 dark:text-blue-300 mb-2">How to use</h3>
-              <ul className="text-sm text-blue-700 dark:text-blue-400 space-y-2">
+            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+              <h3 className="font-medium text-green-800 dark:text-green-300 mb-2">How to use</h3>
+              <ul className="text-sm text-green-700 dark:text-green-400 space-y-2">
                 <li>• The orange flag shows the organizer's location</li>
                 <li>• Green marker = route start</li>
                 <li>• Red marker = route end</li>

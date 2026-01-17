@@ -161,7 +161,7 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
                 />
                 <button
                   onClick={() => handleCopyUrl(participantUrl)}
-                  className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                  className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
                 >
                   Copy
                 </button>
@@ -175,8 +175,8 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
             </div>
 
             {/* Organizer Link */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-              <p className="text-sm font-medium text-blue-700 dark:text-blue-300 mb-2">
+            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+              <p className="text-sm font-medium text-green-700 dark:text-green-300 mb-2">
                 Your organizer link (keep private):
               </p>
               <div className="flex gap-2">
@@ -188,12 +188,12 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
                 />
                 <button
                   onClick={() => handleCopyUrl(organizerUrl)}
-                  className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                  className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
                 >
                   Copy
                 </button>
               </div>
-              <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
+              <p className="text-xs text-green-600 dark:text-green-400 mt-2">
                 PIN: {createdEvent.organizerPin}
               </p>
             </div>
@@ -300,7 +300,7 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
                   value={eventName}
                   onChange={(e) => setEventName(e.target.value)}
                   placeholder="Morning Walk at the Park"
-                  className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                  className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 />
               </div>
 
@@ -317,7 +317,7 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
                   value={pin}
                   onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
                   placeholder="1234"
-                  className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                  className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 />
               </div>
 
@@ -334,7 +334,7 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
                   value={confirmPin}
                   onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ''))}
                   placeholder="1234"
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
                     confirmPin && pin !== confirmPin
                       ? 'border-red-500 dark:border-red-500'
                       : 'dark:border-gray-600'
@@ -359,7 +359,7 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
                 <div className="space-y-2">
                   <label className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 ${
                     broadcastMode === 'continuous'
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
                       : 'dark:border-gray-600'
                   }`}>
                     <input
@@ -367,7 +367,7 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
                       name="broadcastMode"
                       checked={broadcastMode === 'continuous'}
                       onChange={() => setBroadcastMode('continuous')}
-                      className="text-blue-600 mt-1"
+                      className="text-green-600 mt-1"
                     />
                     <div>
                       <p className="font-medium text-gray-800 dark:text-gray-200 flex items-center gap-2">
@@ -381,7 +381,7 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
                   </label>
                   <label className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 ${
                     broadcastMode === 'manual'
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
                       : 'dark:border-gray-600'
                   }`}>
                     <input
@@ -389,7 +389,7 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
                       name="broadcastMode"
                       checked={broadcastMode === 'manual'}
                       onChange={() => setBroadcastMode('manual')}
-                      className="text-blue-600 mt-1"
+                      className="text-green-600 mt-1"
                     />
                     <div>
                       <p className="font-medium text-gray-800 dark:text-gray-200">On-Demand Updates</p>
@@ -419,9 +419,9 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
             </div>
 
             {/* Tips */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-sm">
-              <h3 className="font-medium text-blue-800 dark:text-blue-300 mb-2">Tips</h3>
-              <ul className="text-blue-700 dark:text-blue-400 space-y-1">
+            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 text-sm">
+              <h3 className="font-medium text-green-800 dark:text-green-300 mb-2">Tips</h3>
+              <ul className="text-green-700 dark:text-green-400 space-y-1">
                 <li>• Click on the map to add route points</li>
                 <li>• Share the participant link with your group</li>
                 <li>• Use the organizer link to broadcast your location</li>
@@ -460,7 +460,7 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
 
           {isLoadingEvents ? (
             <div className="bg-white dark:bg-gray-900 rounded-lg p-8 text-center">
-              <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-3"></div>
+              <div className="animate-spin w-8 h-8 border-4 border-green-600 border-t-transparent rounded-full mx-auto mb-3"></div>
               <p className="text-gray-500 dark:text-gray-400">Loading events...</p>
             </div>
           ) : filteredEvents.length === 0 ? (
@@ -508,7 +508,7 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
                     </button>
                     <button
                       onClick={() => { window.location.hash = `/${event.id}?organizer=true`; }}
-                      className="flex-1 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      className="flex-1 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                     >
                       Manage
                     </button>

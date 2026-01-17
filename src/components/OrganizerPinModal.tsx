@@ -43,7 +43,7 @@ export const OrganizerPinModal: React.FC<OrganizerPinModalProps> = ({
             value={pin}
             onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
             placeholder="0000"
-            className="w-full text-center text-3xl tracking-[0.5em] py-3 px-4 border-2 rounded-lg focus:border-blue-500 focus:outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+            className="w-full text-center text-3xl tracking-[0.5em] py-3 px-4 border-2 rounded-lg focus:border-green-500 focus:outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
             autoFocus
           />
 
@@ -62,7 +62,7 @@ export const OrganizerPinModal: React.FC<OrganizerPinModalProps> = ({
             <button
               type="submit"
               disabled={pin.length !== 4}
-              className="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              className="flex-1 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
               Confirm
             </button>

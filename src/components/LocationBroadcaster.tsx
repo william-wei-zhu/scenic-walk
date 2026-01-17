@@ -142,7 +142,7 @@ export const LocationBroadcaster: React.FC<LocationBroadcasterProps> = ({
       ) : (
         <button
           onClick={handleManualBroadcast}
-          className="w-full py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+          className="w-full py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
         >
           <span className="text-xl">📍</span>
           Broadcast My Location

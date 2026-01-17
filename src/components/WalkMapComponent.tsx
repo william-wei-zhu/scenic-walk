@@ -132,7 +132,7 @@ export const WalkMapComponent: React.FC<WalkMapComponentProps> = ({
     const polyline = new google.maps.Polyline({
       path: route,
       geodesic: true,
-      strokeColor: '#2563eb',
+      strokeColor: '#16a34a',
       strokeOpacity: 1.0,
       strokeWeight: 4,
       map: mapInstanceRef.current,
@@ -278,7 +278,7 @@ export const WalkMapComponent: React.FC<WalkMapComponentProps> = ({
         <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
           <button
             onClick={centerOnOrganizer}
-            className="px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg shadow-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+            className="px-3 py-2 bg-green-600 text-white text-sm font-medium rounded-lg shadow-lg hover:bg-green-700 transition-colors flex items-center gap-2"
           >
             <span>📍</span> Center on Me
           </button>

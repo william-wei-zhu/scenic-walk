@@ -27,7 +27,7 @@ export const Toast: React.FC<ToastProps> = ({
   const bgColor = {
     success: 'bg-green-600',
     error: 'bg-red-600',
-    info: 'bg-blue-600',
+    info: 'bg-green-600',
   }[type];
 
   const icon = {
