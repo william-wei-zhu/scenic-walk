@@ -21,6 +21,12 @@ npm run lint     # Run ESLint
 - Firebase Realtime Database (no custom backend)
 - Google Maps JavaScript API with Advanced Markers
 
+### Design System
+- **Primary Color**: Green (`green-600` / #16a34a) - nature-inspired theme
+- **Font**: Nunito (rounded, friendly style matching the hiking goat logo)
+- **Logo**: Cute hiking goat mascot with backpack
+- **Route Line**: Green (#16a34a) on map
+
 ### Routing (Hash-based)
 Routes are handled manually in `src/App.tsx` using `window.location.hash`:
 - `/#/` → HomePage (event list + create button)
@@ -141,7 +147,7 @@ All status indicators use icons + text labels alongside colors:
 
 ### Form Patterns
 - PIN entry requires confirmation field with real-time validation
-- Selected radio options show highlighted border (`border-blue-500 bg-blue-50`)
+- Selected radio options show highlighted border (`border-green-500 bg-green-50`)
 - Broadcast mode renamed: "Continuous Updates" (recommended) / "On-Demand Updates"
 
 ### Layout
