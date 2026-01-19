@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../services/storage_service.dart';
 import '../services/firebase_service.dart';
 import '../services/background_service.dart';
 import 'add_event_screen.dart';
+import 'create_event_screen.dart';
 import 'event_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -75,6 +77,16 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _navigateToCreateEvent() async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (context) => const CreateEventScreen()),
+    );
+    if (result == true) {
+      _loadEvents();
+    }
+  }
+
   void _navigateToAddEvent() async {
     final result = await Navigator.push<bool>(
       context,
@@ -110,18 +122,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     children: [
                       const SizedBox(height: 32),
-                      // Logo placeholder - using icon for now
-                      Container(
-                        width: 120,
-                        height: 120,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF059669).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        child: const Icon(
-                          Icons.directions_walk,
-                          size: 64,
-                          color: Color(0xFF059669),
+                      // Logo
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(24),
+                        child: SvgPicture.asset(
+                          'assets/logo.svg',
+                          width: 120,
+                          height: 120,
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -140,12 +147,23 @@ class _HomeScreenState extends State<HomeScreen> {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 24),
+                      // Create Event button (primary)
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
-                          onPressed: _navigateToAddEvent,
+                          onPressed: _navigateToCreateEvent,
                           icon: const Icon(Icons.add),
-                          label: const Text('Add Event'),
+                          label: const Text('Create Event'),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      // Add existing event button (secondary)
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: _navigateToAddEvent,
+                          icon: const Icon(Icons.link),
+                          label: const Text('Add Existing Event'),
                         ),
                       ),
                     ],
@@ -181,7 +199,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Add an event to start broadcasting your location.',
+                            'Create a new event or add an existing one to start broadcasting your location.',
                             style: TextStyle(color: Colors.grey[500]),
                             textAlign: TextAlign.center,
                           ),

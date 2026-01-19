@@ -268,39 +268,45 @@ function HomePage({ onCreateEvent, isDarkMode, onToggleDarkMode }: HomePageProps
                   return (
                     <div
                       key={event.id}
-                      className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg px-4 py-3 shadow-sm hover:shadow transition-shadow"
+                      className="bg-white dark:bg-gray-800 rounded-lg px-4 py-3 shadow-sm hover:shadow transition-shadow"
                     >
-                      <button
-                        onClick={() => window.location.hash = `/${event.id}?organizer=true`}
-                        className="flex-1 text-left flex items-center gap-3"
-                      >
-                        <span className="text-gray-900 dark:text-gray-100 font-medium">
-                          {event.name}
-                        </span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {formatDate(event.createdAt)}
-                        </span>
-                        {status === 'loading' ? (
-                          <span className="text-xs text-gray-400">...</span>
-                        ) : status === 'active' ? (
-                          <span className="text-xs text-green-600 dark:text-green-400 font-medium">
-                            Active
+                      <div className="flex items-center justify-between">
+                        <button
+                          onClick={() => window.location.hash = `/${event.id}?organizer=true`}
+                          className="flex-1 text-left flex items-center gap-3"
+                        >
+                          <span className="text-gray-900 dark:text-gray-100 font-medium">
+                            {event.name}
                           </span>
-                        ) : (
-                          <span className="text-xs text-gray-400">
-                            Ended
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            {formatDate(event.createdAt)}
                           </span>
-                        )}
-                      </button>
-                      <button
-                        onClick={() => handleRemoveEvent(event.id)}
-                        className="ml-2 p-1 text-gray-400 hover:text-red-500 transition-colors"
-                        title="Remove from list"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
+                          {status === 'loading' ? (
+                            <span className="text-xs text-gray-400">...</span>
+                          ) : status === 'active' ? (
+                            <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                              Active
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-400">
+                              Ended
+                            </span>
+                          )}
+                        </button>
+                        <button
+                          onClick={() => handleRemoveEvent(event.id)}
+                          className="ml-2 p-1 text-gray-400 hover:text-red-500 transition-colors"
+                          title="Remove from list"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                      <div className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                        Event ID: <span className="font-mono">{event.id}</span>
+                        <span className="ml-2 text-gray-400">— use this to access from mobile app</span>
+                      </div>
                     </div>
                   );
                 })}

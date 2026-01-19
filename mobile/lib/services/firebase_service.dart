@@ -134,4 +134,28 @@ class FirebaseService {
       return WalkEvent.fromSnapshot(event.snapshot);
     });
   }
+
+  /// Create a new event
+  static Future<bool> createEvent({
+    required String id,
+    required String name,
+    required String organizerPin,
+    required List<Map<String, double>> route,
+  }) async {
+    try {
+      await _database.child('events/$id').set({
+        'id': id,
+        'name': name,
+        'organizerPin': organizerPin,
+        'createdAt': DateTime.now().millisecondsSinceEpoch,
+        'status': 'active',
+        'broadcastMode': 'continuous',
+        'route': route,
+      });
+      return true;
+    } catch (e) {
+      print('Error creating event: $e');
+      return false;
+    }
+  }
 }
