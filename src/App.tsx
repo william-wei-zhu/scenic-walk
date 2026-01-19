@@ -201,7 +201,7 @@ function HomePage({ onCreateEvent, isDarkMode, onToggleDarkMode }: HomePageProps
       <main className="px-4 py-12 text-center">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
-            <img src="/logo.png" alt="Scenic Walk" className="w-28 h-28 mx-auto rounded-2xl shadow-lg" />
+            <img src="/logo.svg" alt="Scenic Walk" className="w-48 h-48 mx-auto rounded-2xl shadow-lg" />
           </div>
 
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
