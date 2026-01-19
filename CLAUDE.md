@@ -49,7 +49,8 @@ src/
 │   ├── useGeolocation.ts       # Browser Geolocation API wrapper
 │   └── useLiveLocation.ts      # Firebase location subscription
 ├── services/
-│   └── firebase.ts             # Firebase config + CRUD operations
+│   ├── firebase.ts             # Firebase config + CRUD operations
+│   └── organizerStorage.ts     # localStorage for organizer's events
 └── types/
     └── index.ts                # TypeScript interfaces
 ```
@@ -124,7 +125,29 @@ gcloud run services logs read scenic-walk --region us-west1 --project scenic-wal
 Maps API loaded via script tag in `App.tsx` with callback to `window.initMap`. Components check `window.google?.maps` before rendering.
 
 ### Dark Mode
-Toggle stored in localStorage (`darkMode`). Applied via `document.documentElement.classList.add('dark')`.
+Toggle stored in localStorage (`scenic-walk-dark-mode`). Applied via `document.documentElement.classList.add('dark')`.
+
+### My Events (Organizer Persistence)
+Organizers can return to their events after closing the browser:
+- Events saved to localStorage (`scenic-walk-organizer-events`) after creation
+- Homepage shows "My Events" list with status badges (Active/Ended)
+- Clicking an event auto-verifies PIN (skips modal) using stored PIN
+- Events are device-specific (not synced across devices)
+
+```typescript
+// organizerStorage.ts
+interface SavedEvent {
+  id: string;
+  name: string;
+  pin: string;      // For auto-verification
+  createdAt: number;
+}
+
+getOrganizerEvents(): SavedEvent[]
+saveOrganizerEvent(event: SavedEvent): void
+removeOrganizerEvent(eventId: string): void
+getStoredPin(eventId: string): string | null
+```
 
 ### Location Broadcasting
 - **Continuous mode**: Auto-updates location every ~10 seconds while broadcasting
@@ -152,4 +175,4 @@ All status indicators use icons + text labels alongside colors:
 ### Layout
 - Maps use full-width layout (no max-w constraints)
 - Mobile map height: 65vh, Desktop: flex-1
-- Homepage: Minimal (logo + tagline + CTA button only)
+- Homepage: Logo + tagline + CTA button + My Events list (if any)

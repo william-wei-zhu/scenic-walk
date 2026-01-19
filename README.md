@@ -1,6 +1,6 @@
 # Scenic Walk
 
-**Scroll Less, Walk More** - Open-source community walking events with live GPS location sharing.
+**Never lose your walking group again.** Open-source community walking events with live GPS location sharing.
 
 Create walking events, draw routes on a map, and share your live location with participants in real-time. Perfect for group walks, guided tours, hikes, and outdoor activities.
 
@@ -10,6 +10,7 @@ Create walking events, draw routes on a map, and share your live location with p
 - **Custom Route Drawing** - Plan your walk by clicking points on the map
 - **Easy Sharing** - Simple shareable links, no app downloads required
 - **Organizer PIN** - Secure access for event organizers
+- **My Events** - Return to your events anytime (saved locally on device)
 - **Auto/Manual Mode** - Choose continuous or on-demand location updates
 - **Dark Mode** - Full dark theme support
 - **Mobile Responsive** - Works on phones, tablets, and desktops
@@ -106,10 +107,9 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 1. Click "Create Walk Event" on the home page
 2. Draw your route by clicking on the map
 3. Enter an event name and 4-digit PIN
-4. Choose broadcast mode (Auto or Manual)
-5. Click "Create Event"
-6. Share the participant link with your group
-7. Keep your organizer link private
+4. Click "Create Event"
+5. Share the participant link with your group
+6. Your event is saved to "My Events" for easy access later
 
 ### Organizing a Walk
 
@@ -141,8 +141,9 @@ scenic-walk/
 │   ├── hooks/               # Custom React hooks
 │   │   ├── useGeolocation.ts
 │   │   └── useLiveLocation.ts
-│   ├── services/            # Firebase integration
-│   │   └── firebase.ts
+│   ├── services/            # Backend + local storage
+│   │   ├── firebase.ts
+│   │   └── organizerStorage.ts
 │   ├── types/               # TypeScript types
 │   │   └── index.ts
 │   ├── App.tsx              # Main app with routing
