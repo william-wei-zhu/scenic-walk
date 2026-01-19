@@ -44,10 +44,10 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <!-- Google Maps API Key -->
+        <!-- Google Maps API Key (loaded from local.properties) -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyD9JNg7HMYsLAgTeu6vFLrscBqIOXrF7FI"/>
+            android:value="${MAPS_API_KEY}"/>
         <!-- Background service for location broadcasting -->
         <service
             android:name="id.flutter.flutter_background_service.BackgroundService"
