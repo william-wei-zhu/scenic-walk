@@ -11,9 +11,9 @@ Create walking events, draw routes on a map, and share your live location with p
 - **Easy Sharing** - Simple shareable links, no app downloads required
 - **Organizer PIN** - Secure access for event organizers
 - **My Events** - Return to your events anytime (saved locally on device)
-- **Auto/Manual Mode** - Choose continuous or on-demand location updates
 - **Dark Mode** - Full dark theme support
 - **Mobile Responsive** - Works on phones, tablets, and desktops
+- **Android App** - Background location broadcasting (coming soon)
 
 ## Quick Start
 
@@ -33,6 +33,7 @@ cd scenic-walk
 ### 2. Install Dependencies
 
 ```bash
+cd web
 npm install
 ```
 
@@ -70,7 +71,7 @@ npm install
 
 ### 5. Configure Environment Variables
 
-Create a `.env` file from the example:
+Create a `.env` file from the example (inside the `web/` folder):
 
 ```bash
 cp .env.example .env
@@ -130,34 +131,22 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ```
 scenic-walk/
-├── src/
-│   ├── components/          # React components
-│   │   ├── CreateWalkEvent.tsx
-│   │   ├── WalkEventView.tsx
-│   │   ├── WalkMapComponent.tsx
-│   │   ├── LocationBroadcaster.tsx
-│   │   ├── OrganizerPinModal.tsx
-│   │   └── LoadingSpinner.tsx
-│   ├── hooks/               # Custom React hooks
-│   │   ├── useGeolocation.ts
-│   │   └── useLiveLocation.ts
-│   ├── services/            # Backend + local storage
-│   │   ├── firebase.ts
-│   │   └── organizerStorage.ts
-│   ├── types/               # TypeScript types
-│   │   └── index.ts
-│   ├── App.tsx              # Main app with routing
-│   ├── main.tsx             # Entry point
-│   ├── main.css             # Tailwind imports
-│   └── vite-env.d.ts        # Vite environment types
-├── .env.example             # Environment variables template
-├── package.json
-├── vite.config.ts
-├── tailwind.config.js
-├── postcss.config.js
-├── tsconfig.json
+├── web/                     # React web app
+│   ├── src/
+│   │   ├── components/      # React components
+│   │   ├── hooks/           # Custom React hooks
+│   │   ├── services/        # Firebase + local storage
+│   │   └── types/           # TypeScript types
+│   ├── package.json
+│   ├── Dockerfile
+│   └── ...
+├── mobile/                  # Flutter app (coming soon)
+│   └── ...
+├── .github/workflows/       # CI/CD
+│   └── deploy-web.yml
 ├── CLAUDE.md                # AI assistant context
-└── CONTRIBUTING.md          # Contribution guidelines
+├── README.md
+└── LICENSE
 ```
 
 ## URL Routes
@@ -191,30 +180,27 @@ scenic-walk/
 
 ## Production Deployment
 
-### Automatic Deployment (CI/CD)
+### Web App (Automatic CI/CD)
 
-This project uses **GitHub Actions** for automatic deployment to **Google Cloud Run**.
-
-Simply push to the `main` branch:
+Pushing changes to `web/` on `main` branch automatically deploys to **Google Cloud Run**.
 
 ```bash
 git push origin main
 ```
 
-The workflow will:
+The workflow (`.github/workflows/deploy-web.yml`) will:
 1. Build a Docker image with the Vite frontend
 2. Push to Google Artifact Registry
 3. Deploy to Cloud Run
 
-**Live URL**: Check the Cloud Run service URL after deployment.
-
 ### Manual Build
 
 ```bash
+cd web
 npm run build
 ```
 
-The output will be in the `dist/` directory.
+The output will be in the `web/dist/` directory.
 
 ### Alternative Hosting
 

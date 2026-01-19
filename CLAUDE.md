@@ -4,9 +4,28 @@
 
 Scenic Walk is an open-source (AGPL-3.0) community walking events app with live GPS location sharing. Organizers create events with drawn routes and broadcast their real-time location to participants.
 
-## Development Commands
+## Repository Structure (Monorepo)
+
+```
+scenic-walk/
+├── web/                    # React web app (participants + organizers)
+│   ├── src/
+│   ├── package.json
+│   └── ...
+├── mobile/                 # Flutter app (organizers only, coming soon)
+│   └── ...
+├── .github/workflows/
+│   └── deploy-web.yml      # Web app CI/CD
+├── CLAUDE.md
+├── README.md
+└── LICENSE
+```
+
+## Web App Development
 
 ```bash
+cd web
+npm install
 npm run dev      # Start dev server on http://localhost:3000
 npm run build    # Build for production (outputs to dist/)
 npm run preview  # Preview production build
@@ -15,11 +34,16 @@ npm run lint     # Run ESLint
 
 ## Architecture
 
-### Tech Stack
+### Tech Stack (Web)
 - React 19 + TypeScript + Vite
 - Tailwind CSS (dark mode via class strategy)
-- Firebase Realtime Database (no custom backend)
+- Firebase Realtime Database (shared with mobile app)
 - Google Maps JavaScript API with Advanced Markers
+
+### Tech Stack (Mobile - Coming Soon)
+- Flutter (Android first, iOS later)
+- Firebase Realtime Database (same as web)
+- Background location service for organizers
 
 ### Design System
 - **Primary Color**: Green (`green-600` / #16a34a) - nature-inspired theme
@@ -34,25 +58,29 @@ Routes are handled manually in `src/App.tsx` using `window.location.hash`:
 - `/#/:eventId` → WalkEventView (participant view)
 - `/#/:eventId?organizer=true` → WalkEventView (organizer view with PIN)
 
-### Component Structure
+### Web App Structure
 ```
-src/
-├── components/
-│   ├── CreateWalkEvent.tsx     # Event creation with route drawing + PIN confirmation
-│   ├── WalkEventView.tsx       # Main event view (participant/organizer)
-│   ├── WalkMapComponent.tsx    # Google Maps with markers + polylines
-│   ├── LocationBroadcaster.tsx # GPS broadcast controls
-│   ├── OrganizerPinModal.tsx   # PIN entry modal
-│   ├── Toast.tsx               # Toast notifications + useToast hook
-│   └── LoadingSpinner.tsx      # Loading indicator
-├── hooks/
-│   ├── useGeolocation.ts       # Browser Geolocation API wrapper
-│   └── useLiveLocation.ts      # Firebase location subscription
-├── services/
-│   ├── firebase.ts             # Firebase config + CRUD operations
-│   └── organizerStorage.ts     # localStorage for organizer's events
-└── types/
-    └── index.ts                # TypeScript interfaces
+web/
+├── src/
+│   ├── components/
+│   │   ├── CreateWalkEvent.tsx     # Event creation with route drawing + PIN
+│   │   ├── WalkEventView.tsx       # Main event view (participant/organizer)
+│   │   ├── WalkMapComponent.tsx    # Google Maps with markers + polylines
+│   │   ├── LocationBroadcaster.tsx # GPS broadcast controls
+│   │   ├── OrganizerPinModal.tsx   # PIN entry modal
+│   │   ├── Toast.tsx               # Toast notifications + useToast hook
+│   │   └── LoadingSpinner.tsx      # Loading indicator
+│   ├── hooks/
+│   │   ├── useGeolocation.ts       # Browser Geolocation API wrapper
+│   │   └── useLiveLocation.ts      # Firebase location subscription
+│   ├── services/
+│   │   ├── firebase.ts             # Firebase config + CRUD operations
+│   │   └── organizerStorage.ts     # localStorage for organizer's events
+│   └── types/
+│       └── index.ts                # TypeScript interfaces
+├── Dockerfile
+├── nginx.conf
+└── package.json
 ```
 
 ### Firebase Data Structure
@@ -74,7 +102,7 @@ src/
 
 ## Environment Variables
 
-Required in `.env`:
+Required in `web/.env`:
 ```
 VITE_FIREBASE_API_KEY=
 VITE_FIREBASE_AUTH_DOMAIN=
@@ -88,25 +116,18 @@ VITE_GOOGLE_MAPS_API_KEY=
 
 ## Deployment
 
-**CI/CD via GitHub Actions** - Pushing to `main` automatically deploys to Google Cloud Run.
+### Web App (Cloud Run)
 
-### GCP Project
+**CI/CD via GitHub Actions** - Pushing changes to `web/` automatically deploys to Google Cloud Run.
+
 - Project ID: `scenic-walk-484001`
 - Region: `us-west1`
 - Service: `scenic-walk`
+- Workflow: `.github/workflows/deploy-web.yml`
 
-### Infrastructure
-- **Cloud Run**: Hosts the containerized frontend
-- **Artifact Registry**: Stores Docker images at `us-west1-docker.pkg.dev/scenic-walk-484001/scenic-walk`
-- **Workload Identity Federation**: Keyless GitHub → GCP authentication (no service account keys)
-
-### Deployment Files
-- `Dockerfile`: Multi-stage build (node:20 → nginx:alpine)
-- `nginx.conf`: SPA routing + security headers
-- `.github/workflows/deploy.yml`: GitHub Actions workflow
-
-### Manual Deployment (emergency only)
+**Manual Deployment:**
 ```bash
+cd web
 gcloud run deploy scenic-walk \
   --source . \
   --region us-west1 \
@@ -114,10 +135,14 @@ gcloud run deploy scenic-walk \
   --allow-unauthenticated
 ```
 
-### View Logs
+**View Logs:**
 ```bash
 gcloud run services logs read scenic-walk --region us-west1 --project scenic-walk-484001 --limit 50
 ```
+
+### Mobile App (Coming Soon)
+- Android APK builds via GitHub Actions
+- Flutter app for organizer location broadcasting
 
 ## Key Patterns
 
