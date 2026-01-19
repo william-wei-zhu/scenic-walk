@@ -209,8 +209,7 @@ function HomePage({ onCreateEvent, isDarkMode, onToggleDarkMode }: HomePageProps
           </h1>
 
           <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
-            Create walking events and share your live location with participants.
-            Perfect for group walks, tours, and outdoor activities.
+            Never lose your walking group again.
           </p>
 
           <button
