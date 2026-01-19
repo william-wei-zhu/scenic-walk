@@ -12,10 +12,16 @@ scenic-walk/
 │   ├── src/
 │   ├── package.json
 │   └── ...
-├── mobile/                 # Flutter app (organizers only, coming soon)
-│   └── ...
+├── mobile/                 # Flutter app (organizers only)
+│   ├── lib/
+│   │   ├── main.dart
+│   │   ├── screens/
+│   │   └── services/
+│   ├── android/
+│   └── pubspec.yaml
 ├── .github/workflows/
-│   └── deploy-web.yml      # Web app CI/CD
+│   ├── deploy-web.yml      # Web app CI/CD
+│   └── build-android.yml   # Android APK CI/CD
 ├── CLAUDE.md
 ├── README.md
 └── LICENSE
@@ -40,10 +46,11 @@ npm run lint     # Run ESLint
 - Firebase Realtime Database (shared with mobile app)
 - Google Maps JavaScript API with Advanced Markers
 
-### Tech Stack (Mobile - Coming Soon)
-- Flutter (Android first, iOS later)
+### Tech Stack (Mobile)
+- Flutter 3.32+ (Android, iOS coming later)
 - Firebase Realtime Database (same as web)
-- Background location service for organizers
+- Android Foreground Service for background location
+- Key packages: `geolocator`, `flutter_background_service`, `permission_handler`
 
 ### Design System
 - **Primary Color**: Green (`green-600` / #16a34a) - nature-inspired theme
@@ -81,6 +88,29 @@ web/
 ├── Dockerfile
 ├── nginx.conf
 └── package.json
+```
+
+### Mobile App Structure
+```
+mobile/
+├── lib/
+│   ├── main.dart               # App entry, Firebase init, theme
+│   ├── screens/
+│   │   ├── home_screen.dart    # Event list, add event button
+│   │   ├── add_event_screen.dart    # Enter event ID + PIN
+│   │   └── event_detail_screen.dart # Broadcast controls, status
+│   └── services/
+│       ├── firebase_service.dart    # Firebase read/write
+│       ├── storage_service.dart     # SharedPreferences for events
+│       ├── location_service.dart    # Foreground location
+│       └── background_service.dart  # Background location service
+├── android/
+│   ├── app/
+│   │   ├── build.gradle.kts
+│   │   ├── google-services.json     # Firebase config
+│   │   └── src/main/AndroidManifest.xml
+│   └── build.gradle.kts
+└── pubspec.yaml
 ```
 
 ### Firebase Data Structure
@@ -140,9 +170,29 @@ gcloud run deploy scenic-walk \
 gcloud run services logs read scenic-walk --region us-west1 --project scenic-walk-484001 --limit 50
 ```
 
-### Mobile App (Coming Soon)
-- Android APK builds via GitHub Actions
-- Flutter app for organizer location broadcasting
+### Mobile App (Android)
+
+**CI/CD via GitHub Actions** - Pushing changes to `mobile/` triggers APK build.
+
+- Workflow: `.github/workflows/build-android.yml`
+- APK artifact uploaded to GitHub Actions
+- Release APK attached to GitHub releases when tagged
+
+**Local Development:**
+```bash
+cd mobile
+flutter pub get
+flutter run              # Run on connected device/emulator
+flutter build apk        # Build debug APK
+flutter build apk --release  # Build release APK
+```
+
+**Requirements:**
+- Flutter 3.32+
+- Java 17
+- Android SDK 35+
+
+**APK Location:** `mobile/build/app/outputs/flutter-apk/app-release.apk`
 
 ## Key Patterns
 

@@ -13,7 +13,7 @@ Create walking events, draw routes on a map, and share your live location with p
 - **My Events** - Return to your events anytime (saved locally on device)
 - **Dark Mode** - Full dark theme support
 - **Mobile Responsive** - Works on phones, tablets, and desktops
-- **Android App** - Background location broadcasting (coming soon)
+- **Android App** - Background location broadcasting for organizers
 
 ## Quick Start
 
@@ -140,10 +140,15 @@ scenic-walk/
 │   ├── package.json
 │   ├── Dockerfile
 │   └── ...
-├── mobile/                  # Flutter app (coming soon)
-│   └── ...
+├── mobile/                  # Flutter Android app (organizers)
+│   ├── lib/
+│   │   ├── screens/         # Home, Add Event, Event Detail
+│   │   └── services/        # Firebase, Location, Storage
+│   ├── android/
+│   └── pubspec.yaml
 ├── .github/workflows/       # CI/CD
-│   └── deploy-web.yml
+│   ├── deploy-web.yml       # Web app deployment
+│   └── build-android.yml    # Android APK build
 ├── CLAUDE.md                # AI assistant context
 ├── README.md
 └── LICENSE
@@ -202,6 +207,19 @@ npm run build
 
 The output will be in the `web/dist/` directory.
 
+### Mobile App (Android APK)
+
+The Flutter Android app allows organizers to broadcast their location even when the phone is locked.
+
+**Build locally:**
+```bash
+cd mobile
+flutter pub get
+flutter build apk --release
+```
+
+**CI/CD:** Pushing changes to `mobile/` triggers GitHub Actions to build the APK, which is available as a workflow artifact.
+
 ### Alternative Hosting
 
 You can also deploy the `dist/` folder to any static hosting:
@@ -236,12 +254,19 @@ You can also deploy the `dist/` folder to any static hosting:
 
 ## Tech Stack
 
+### Web
 - **React 19** - UI framework
 - **TypeScript** - Type safety
 - **Vite** - Build tool
 - **Tailwind CSS** - Styling
 - **Firebase Realtime Database** - Real-time data sync
 - **Google Maps JavaScript API** - Maps and markers
+
+### Mobile (Android)
+- **Flutter** - Cross-platform framework
+- **Firebase Realtime Database** - Same backend as web
+- **Geolocator** - Location services
+- **Flutter Background Service** - Background location broadcasting
 
 ## Contributing
 

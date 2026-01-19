@@ -1,6 +1,24 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Location permissions -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+
+    <!-- Foreground service for background location -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+
+    <!-- Wake lock for keeping service alive -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- Internet for Firebase -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Notifications -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
-        android:label="scenic_walk"
+        android:label="Scenic Walk"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
