@@ -1,5 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { LoadingSpinner } from './components/LoadingSpinner';
+import { getOrganizerEvents, removeOrganizerEvent, type SavedEvent } from './services/organizerStorage';
+import { getWalkEvent } from './services/firebase';
 
 // Lazy load components for code splitting
 const CreateWalkEvent = lazy(() => import('./components/CreateWalkEvent'));
@@ -184,6 +186,41 @@ interface HomePageProps {
 }
 
 function HomePage({ onCreateEvent, isDarkMode, onToggleDarkMode }: HomePageProps) {
+  const [savedEvents, setSavedEvents] = useState<SavedEvent[]>([]);
+  const [eventStatuses, setEventStatuses] = useState<Record<string, 'active' | 'ended' | 'loading'>>({});
+
+  // Load saved events on mount
+  useEffect(() => {
+    const events = getOrganizerEvents();
+    setSavedEvents(events);
+
+    // Fetch status for each event
+    events.forEach(async (event) => {
+      setEventStatuses(prev => ({ ...prev, [event.id]: 'loading' }));
+      try {
+        const walkEvent = await getWalkEvent(event.id);
+        setEventStatuses(prev => ({
+          ...prev,
+          [event.id]: walkEvent?.status || 'ended',
+        }));
+      } catch {
+        setEventStatuses(prev => ({ ...prev, [event.id]: 'ended' }));
+      }
+    });
+  }, []);
+
+  const handleRemoveEvent = (eventId: string) => {
+    removeOrganizerEvent(eventId);
+    setSavedEvents(prev => prev.filter(e => e.id !== eventId));
+  };
+
+  const formatDate = (timestamp: number) => {
+    return new Date(timestamp).toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-gray-900 dark:to-gray-950">
       {/* Header */}
@@ -218,6 +255,61 @@ function HomePage({ onCreateEvent, isDarkMode, onToggleDarkMode }: HomePageProps
           >
             Create Walk Event
           </button>
+
+          {/* My Events Section */}
+          {savedEvents.length > 0 && (
+            <div className="mt-12">
+              <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4">
+                My Events
+              </h2>
+              <div className="space-y-2 max-w-md mx-auto">
+                {savedEvents.map((event) => {
+                  const status = eventStatuses[event.id];
+                  return (
+                    <div
+                      key={event.id}
+                      className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg px-4 py-3 shadow-sm hover:shadow transition-shadow"
+                    >
+                      <button
+                        onClick={() => window.location.hash = `/${event.id}?organizer=true`}
+                        className="flex-1 text-left flex items-center gap-3"
+                      >
+                        <span className="text-gray-900 dark:text-gray-100 font-medium">
+                          {event.name}
+                        </span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {formatDate(event.createdAt)}
+                        </span>
+                        {status === 'loading' ? (
+                          <span className="text-xs text-gray-400">...</span>
+                        ) : status === 'active' ? (
+                          <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                            Active
+                          </span>
+                        ) : (
+                          <span className="text-xs text-gray-400">
+                            Ended
+                          </span>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => handleRemoveEvent(event.id)}
+                        className="ml-2 p-1 text-gray-400 hover:text-red-500 transition-colors"
+                        title="Remove from list"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="mt-3 text-xs text-gray-500 dark:text-gray-500">
+                Events are saved on this device only
+              </p>
+            </div>
+          )}
         </div>
       </main>
     </div>

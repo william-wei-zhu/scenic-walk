@@ -5,6 +5,7 @@ import { LocationBroadcaster } from './LocationBroadcaster';
 import { Toast, useToast } from './Toast';
 import { useLiveLocation } from '../hooks';
 import { getWalkEvent, updateWalkEventStatus, clearOrganizerLocation } from '../services/firebase';
+import { getStoredPin } from '../services/organizerStorage';
 import type { WalkEvent } from '../types';
 
 interface WalkEventViewProps {
@@ -42,9 +43,15 @@ export const WalkEventView: React.FC<WalkEventViewProps> = ({
         const eventData = await getWalkEvent(eventId);
         if (eventData) {
           setEvent(eventData);
-          // Show PIN modal if organizer mode
+          // Handle organizer mode
           if (isOrganizerMode) {
-            setShowPinModal(true);
+            // Check for stored PIN (auto-verify if matches)
+            const storedPin = getStoredPin(eventId);
+            if (storedPin && storedPin === eventData.organizerPin) {
+              setIsOrganizerVerified(true);
+            } else {
+              setShowPinModal(true);
+            }
           }
         } else {
           setError('Event not found');

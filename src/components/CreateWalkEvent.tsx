@@ -3,6 +3,7 @@ import { nanoid } from 'nanoid';
 import { WalkMapComponent } from './WalkMapComponent';
 import { Toast, useToast } from './Toast';
 import { createWalkEvent } from '../services/firebase';
+import { saveOrganizerEvent } from '../services/organizerStorage';
 import type { Coordinates, WalkEvent } from '../types';
 
 interface CreateWalkEventProps {
@@ -70,6 +71,15 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
       };
 
       await createWalkEvent(event);
+
+      // Save to localStorage for "My Events" list
+      saveOrganizerEvent({
+        id: event.id,
+        name: event.name,
+        pin: event.organizerPin,
+        createdAt: event.createdAt,
+      });
+
       setCreatedEvent(event);
       onEventCreated?.(event.id);
     } catch (err) {
