@@ -23,6 +23,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   LatLng? _initialPosition;
   bool _isLoading = true;
   bool _isCreating = false;
+  bool _showPin = false;
   String? _errorMessage;
 
   @override
@@ -190,6 +191,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create Event'),
@@ -244,7 +247,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                             vertical: 8,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.9),
+                            color: (isDark ? Colors.grey[900] : Colors.white)?.withOpacity(0.95),
                             borderRadius: BorderRadius.circular(8),
                             boxShadow: [
                               BoxShadow(
@@ -255,15 +258,21 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.touch_app,
-                                  size: 20, color: Colors.grey),
+                              Icon(
+                                Icons.touch_app,
+                                size: 20,
+                                color: isDark ? Colors.grey[400] : Colors.grey,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   _routePoints.isEmpty
                                       ? 'Tap on map to draw your route'
                                       : '${_routePoints.length} points • Tap to add more',
-                                  style: const TextStyle(fontSize: 13),
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: isDark ? Colors.grey[300] : Colors.grey[700],
+                                  ),
                                 ),
                               ),
                             ],
@@ -289,19 +298,26 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: Colors.red.withOpacity(0.1),
+                                color: Colors.red.withOpacity(isDark ? 0.2 : 0.1),
                                 borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.red.withOpacity(0.3)),
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.error_outline,
-                                      color: Colors.red, size: 20),
+                                  const Icon(Icons.error_outline, color: Colors.red, size: 20),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       _errorMessage!,
-                                      style: const TextStyle(color: Colors.red),
+                                      style: TextStyle(color: isDark ? Colors.red[300] : Colors.red),
                                     ),
+                                  ),
+                                  IconButton(
+                                    onPressed: () => setState(() => _errorMessage = null),
+                                    icon: const Icon(Icons.close, size: 18),
+                                    color: Colors.red,
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
                                   ),
                                 ],
                               ),
@@ -327,17 +343,22 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                           ),
                           const SizedBox(height: 16),
 
-                          // PIN
+                          // PIN with visibility toggle
                           TextFormField(
                             controller: _pinController,
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               labelText: 'Organizer PIN',
                               hintText: '4-digit PIN',
-                              prefixIcon: Icon(Icons.lock_outline),
+                              prefixIcon: const Icon(Icons.lock_outline),
+                              suffixIcon: IconButton(
+                                icon: Icon(_showPin ? Icons.visibility_off : Icons.visibility),
+                                onPressed: () => setState(() => _showPin = !_showPin),
+                                tooltip: _showPin ? 'Hide PIN' : 'Show PIN',
+                              ),
                             ),
                             keyboardType: TextInputType.number,
                             maxLength: 4,
-                            obscureText: true,
+                            obscureText: !_showPin,
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return 'Please enter a PIN';

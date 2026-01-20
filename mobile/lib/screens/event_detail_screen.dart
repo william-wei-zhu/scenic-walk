@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:share_plus/share_plus.dart';
 import '../services/storage_service.dart';
 import '../services/firebase_service.dart';
 import '../services/location_service.dart';
@@ -218,8 +220,43 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     }
   }
 
+  void _shareEventLink() async {
+    final eventUrl = 'https://scenic-walk-484001.web.app/#/${widget.savedEvent.id}';
+    final eventName = _event?.name ?? widget.savedEvent.name;
+
+    try {
+      await Share.share(
+        'Join my walk event "$eventName"!\n\n$eventUrl',
+        subject: 'Scenic Walk - $eventName',
+      );
+    } catch (e) {
+      // Fallback to clipboard if share fails
+      await Clipboard.setData(ClipboardData(text: eventUrl));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Link copied to clipboard'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
+  void _copyEventId() {
+    Clipboard.setData(ClipboardData(text: widget.savedEvent.id));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Event ID copied to clipboard'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     if (_isLoading) {
       return Scaffold(
         appBar: AppBar(title: Text(widget.savedEvent.name)),
@@ -245,7 +282,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 const SizedBox(height: 8),
                 Text(
                   'This event may have been deleted or the ID is incorrect.',
-                  style: TextStyle(color: Colors.grey[600]),
+                  style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600]),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -262,8 +299,14 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         title: Text(widget.savedEvent.name),
         actions: [
           IconButton(
+            onPressed: _shareEventLink,
+            icon: const Icon(Icons.share),
+            tooltip: 'Share event link',
+          ),
+          IconButton(
             onPressed: _loadEvent,
             icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh',
           ),
         ],
       ),
@@ -278,10 +321,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: _isBroadcasting
-                    ? Colors.green.withOpacity(0.1)
+                    ? Colors.green.withOpacity(isDark ? 0.2 : 0.1)
                     : isActive
-                        ? Colors.blue.withOpacity(0.1)
-                        : Colors.grey.withOpacity(0.1),
+                        ? Colors.blue.withOpacity(isDark ? 0.2 : 0.1)
+                        : Colors.grey.withOpacity(isDark ? 0.2 : 0.1),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: _isBroadcasting
@@ -317,17 +360,17 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
                       color: _isBroadcasting
-                          ? Colors.green[700]
+                          ? (isDark ? Colors.green[300] : Colors.green[700])
                           : isActive
-                              ? Colors.blue[700]
-                              : Colors.grey[700],
+                              ? (isDark ? Colors.blue[300] : Colors.blue[700])
+                              : (isDark ? Colors.grey[400] : Colors.grey[700]),
                     ),
                   ),
                   if (_isBroadcasting && _lastUpdateTime != null) ...[
                     const SizedBox(height: 4),
                     Text(
                       'Last update: ${_formatTime(_lastUpdateTime!)}',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                      style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600], fontSize: 13),
                     ),
                   ],
                 ],
@@ -340,8 +383,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
+                  color: Colors.red.withOpacity(isDark ? 0.2 : 0.1),
                   borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.withOpacity(0.3)),
                 ),
                 child: Row(
                   children: [
@@ -350,8 +394,15 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     Expanded(
                       child: Text(
                         _errorMessage!,
-                        style: const TextStyle(color: Colors.red),
+                        style: TextStyle(color: isDark ? Colors.red[300] : Colors.red),
                       ),
+                    ),
+                    IconButton(
+                      onPressed: () => setState(() => _errorMessage = null),
+                      icon: const Icon(Icons.close, size: 18),
+                      color: Colors.red,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
                     ),
                   ],
                 ),
@@ -407,6 +458,18 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               const SizedBox(height: 24),
             ],
 
+            // Share button
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: OutlinedButton.icon(
+                onPressed: _shareEventLink,
+                icon: const Icon(Icons.share),
+                label: const Text('Share Event Link'),
+              ),
+            ),
+            const SizedBox(height: 24),
+
             // Event info
             Text(
               'Event Details',
@@ -415,20 +478,28 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   ),
             ),
             const SizedBox(height: 12),
-            _InfoRow(label: 'Event ID', value: _event!.id),
+            _InfoRow(
+              label: 'Event ID',
+              value: _event!.id,
+              onCopy: _copyEventId,
+              isDark: isDark,
+            ),
             _InfoRow(
               label: 'Status',
               value: isActive ? 'Active' : 'Ended',
               valueColor: isActive ? Colors.green : Colors.grey,
+              isDark: isDark,
             ),
             _InfoRow(
               label: 'Created',
               value: _formatDate(DateTime.fromMillisecondsSinceEpoch(_event!.createdAt)),
+              isDark: isDark,
             ),
             if (_event!.route.isNotEmpty)
               _InfoRow(
                 label: 'Route',
                 value: '${_event!.route.length} points',
+                isDark: isDark,
               ),
 
             const SizedBox(height: 24),
@@ -438,7 +509,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.amber.withOpacity(0.1),
+                  color: Colors.amber.withOpacity(isDark ? 0.2 : 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.amber.withOpacity(0.3)),
                 ),
@@ -447,13 +518,13 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.warning_amber, color: Colors.amber[700]),
+                        Icon(Icons.warning_amber, color: isDark ? Colors.amber[300] : Colors.amber[700]),
                         const SizedBox(width: 8),
                         Text(
                           'Background Location',
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
-                            color: Colors.amber[900],
+                            color: isDark ? Colors.amber[300] : Colors.amber[900],
                           ),
                         ),
                       ],
@@ -461,7 +532,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     const SizedBox(height: 8),
                     Text(
                       'Grant "Allow all the time" location permission for broadcasting to continue when your phone is locked.',
-                      style: TextStyle(color: Colors.amber[900], fontSize: 13),
+                      style: TextStyle(color: isDark ? Colors.amber[200] : Colors.amber[900], fontSize: 13),
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
@@ -489,14 +560,17 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               _InfoRow(
                 label: 'Latitude',
                 value: _lastPosition!.latitude.toStringAsFixed(6),
+                isDark: isDark,
               ),
               _InfoRow(
                 label: 'Longitude',
                 value: _lastPosition!.longitude.toStringAsFixed(6),
+                isDark: isDark,
               ),
               _InfoRow(
                 label: 'Accuracy',
                 value: '${_lastPosition!.accuracy.toStringAsFixed(1)} m',
+                isDark: isDark,
               ),
             ],
           ],
@@ -518,11 +592,15 @@ class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
   final Color? valueColor;
+  final VoidCallback? onCopy;
+  final bool isDark;
 
   const _InfoRow({
     required this.label,
     required this.value,
     this.valueColor,
+    this.onCopy,
+    required this.isDark,
   });
 
   @override
@@ -534,14 +612,35 @@ class _InfoRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(color: Colors.grey[600]),
+            style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600]),
           ),
-          Text(
-            value,
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-              color: valueColor,
-            ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                value,
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: valueColor,
+                  fontFamily: label == 'Event ID' ? 'monospace' : null,
+                ),
+              ),
+              if (onCopy != null) ...[
+                const SizedBox(width: 8),
+                InkWell(
+                  onTap: onCopy,
+                  borderRadius: BorderRadius.circular(4),
+                  child: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: Icon(
+                      Icons.copy,
+                      size: 16,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
         ],
       ),

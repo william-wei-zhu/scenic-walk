@@ -15,6 +15,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
   final _pinController = TextEditingController();
 
   bool _isLoading = false;
+  bool _showPin = false;
   String? _errorMessage;
 
   @override
@@ -83,6 +84,8 @@ class _AddEventScreenState extends State<AddEventScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Event'),
@@ -98,17 +101,18 @@ class _AddEventScreenState extends State<AddEventScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
+                  color: Colors.blue.withOpacity(isDark ? 0.2 : 0.1),
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.blue.withOpacity(0.3)),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.info_outline, color: Colors.blue[700]),
+                    Icon(Icons.info_outline, color: isDark ? Colors.blue[300] : Colors.blue[700]),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         'Enter the Event ID and organizer PIN to add an event to your list.',
-                        style: TextStyle(color: Colors.blue[700]),
+                        style: TextStyle(color: isDark ? Colors.blue[200] : Colors.blue[700]),
                       ),
                     ),
                   ],
@@ -142,7 +146,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
               ),
               const SizedBox(height: 24),
 
-              // PIN field
+              // PIN field with visibility toggle
               Text(
                 'Organizer PIN',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -152,14 +156,19 @@ class _AddEventScreenState extends State<AddEventScreen> {
               const SizedBox(height: 8),
               TextFormField(
                 controller: _pinController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Enter 4-digit PIN',
-                  prefixIcon: Icon(Icons.lock_outline),
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                    icon: Icon(_showPin ? Icons.visibility_off : Icons.visibility),
+                    onPressed: () => setState(() => _showPin = !_showPin),
+                    tooltip: _showPin ? 'Hide PIN' : 'Show PIN',
+                  ),
                 ),
                 keyboardType: TextInputType.number,
                 textInputAction: TextInputAction.done,
                 maxLength: 4,
-                obscureText: true,
+                obscureText: !_showPin,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Please enter the PIN';
@@ -178,8 +187,9 @@ class _AddEventScreenState extends State<AddEventScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
+                    color: Colors.red.withOpacity(isDark ? 0.2 : 0.1),
                     borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.red.withOpacity(0.3)),
                   ),
                   child: Row(
                     children: [
@@ -188,8 +198,15 @@ class _AddEventScreenState extends State<AddEventScreen> {
                       Expanded(
                         child: Text(
                           _errorMessage!,
-                          style: const TextStyle(color: Colors.red),
+                          style: TextStyle(color: isDark ? Colors.red[300] : Colors.red),
                         ),
+                      ),
+                      IconButton(
+                        onPressed: () => setState(() => _errorMessage = null),
+                        icon: const Icon(Icons.close, size: 18),
+                        color: Colors.red,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
                       ),
                     ],
                   ),
@@ -223,7 +240,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
               Text(
                 'You can find the Event ID and PIN from the event organizer or from the web app after creating an event.',
                 style: TextStyle(
-                  color: Colors.grey[600],
+                  color: isDark ? Colors.grey[500] : Colors.grey[600],
                   fontSize: 13,
                 ),
               ),

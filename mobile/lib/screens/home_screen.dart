@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../main.dart';
 import '../services/storage_service.dart';
 import '../services/firebase_service.dart';
 import '../services/background_service.dart';
@@ -77,6 +79,16 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _copyEventId(String eventId) {
+    Clipboard.setData(ClipboardData(text: eventId));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Event ID copied to clipboard'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
   void _navigateToCreateEvent() async {
     final result = await Navigator.push<bool>(
       context,
@@ -107,21 +119,64 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadEvents(); // Refresh on return
   }
 
+  String _formatDate(int timestamp) {
+    final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
+    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '${months[date.month - 1]} ${date.day}';
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _loadEvents,
           child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
-              // Header
+              // Header with dark mode toggle
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      // Dark mode toggle
+                      Container(
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.grey[800] : Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: IconButton(
+                          onPressed: () => themeService.toggleTheme(),
+                          icon: Icon(
+                            isDark ? Icons.light_mode : Icons.dark_mode,
+                            color: isDark ? Colors.amber : Colors.grey[700],
+                          ),
+                          tooltip: isDark ? 'Light mode' : 'Dark mode',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Logo and title
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Column(
                     children: [
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 16),
                       // Logo
                       ClipRRect(
                         borderRadius: BorderRadius.circular(24),
@@ -142,7 +197,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text(
                         'Never lose your walking group again.',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: Colors.grey[600],
+                              color: isDark ? Colors.grey[400] : Colors.grey[600],
                             ),
                         textAlign: TextAlign.center,
                       ),
@@ -166,18 +221,41 @@ class _HomeScreenState extends State<HomeScreen> {
                           label: const Text('Add Existing Event'),
                         ),
                       ),
+                      const SizedBox(height: 24),
                     ],
                   ),
                 ),
               ),
 
+              // My Events header
+              if (_events.isNotEmpty || _isLoading)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      'My Events',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.grey[300] : Colors.grey[700],
+                          ),
+                    ),
+                  ),
+                ),
+
               // Events list
               if (_isLoading)
-                const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator()),
+                SliverPadding(
+                  padding: const EdgeInsets.all(16),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => _SkeletonEventCard(isDark: isDark),
+                      childCount: 2,
+                    ),
+                  ),
                 )
               else if (_events.isEmpty)
                 SliverFillRemaining(
+                  hasScrollBody: false,
                   child: Center(
                     child: Padding(
                       padding: const EdgeInsets.all(32),
@@ -194,13 +272,13 @@ class _HomeScreenState extends State<HomeScreen> {
                             'No events yet',
                             style: TextStyle(
                               fontSize: 18,
-                              color: Colors.grey[600],
+                              color: isDark ? Colors.grey[400] : Colors.grey[600],
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             'Create a new event or add an existing one to start broadcasting your location.',
-                            style: TextStyle(color: Colors.grey[500]),
+                            style: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[500]),
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -210,7 +288,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 )
               else
                 SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.all(16),
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
@@ -224,9 +302,27 @@ class _HomeScreenState extends State<HomeScreen> {
                           isBroadcasting: isBroadcasting,
                           onTap: () => _navigateToEventDetail(event),
                           onRemove: () => _removeEvent(event.id),
+                          onCopyId: () => _copyEventId(event.id),
+                          formatDate: _formatDate,
                         );
                       },
                       childCount: _events.length,
+                    ),
+                  ),
+                ),
+
+              // Footer note
+              if (_events.isNotEmpty)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(
+                      'Events are saved on this device only',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? Colors.grey[600] : Colors.grey[500],
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ),
@@ -243,12 +339,72 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+class _SkeletonEventCard extends StatelessWidget {
+  final bool isDark;
+
+  const _SkeletonEventCard({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final shimmerColor = isDark ? Colors.grey[700] : Colors.grey[300];
+    final baseColor = isDark ? Colors.grey[800] : Colors.grey[200];
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            // Icon placeholder
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: baseColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            const SizedBox(width: 16),
+            // Content placeholder
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 150,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      color: shimmerColor,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    width: 100,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: baseColor,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _EventCard extends StatelessWidget {
   final SavedEvent event;
   final WalkEvent? details;
   final bool isBroadcasting;
   final VoidCallback onTap;
   final VoidCallback onRemove;
+  final VoidCallback onCopyId;
+  final String Function(int) formatDate;
 
   const _EventCard({
     required this.event,
@@ -256,12 +412,15 @@ class _EventCard extends StatelessWidget {
     required this.isBroadcasting,
     required this.onTap,
     required this.onRemove,
+    required this.onCopyId,
+    required this.formatDate,
   });
 
   @override
   Widget build(BuildContext context) {
     final isActive = details?.isActive ?? false;
     final eventNotFound = details == null;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -270,56 +429,73 @@ class _EventCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Status indicator
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: isBroadcasting
-                      ? Colors.green.withOpacity(0.1)
-                      : eventNotFound
-                          ? Colors.red.withOpacity(0.1)
-                          : isActive
-                              ? Colors.blue.withOpacity(0.1)
-                              : Colors.grey.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  isBroadcasting
-                      ? Icons.broadcast_on_personal
-                      : eventNotFound
-                          ? Icons.error_outline
-                          : isActive
-                              ? Icons.event_available
-                              : Icons.event_busy,
-                  color: isBroadcasting
-                      ? Colors.green
-                      : eventNotFound
-                          ? Colors.red
-                          : isActive
-                              ? Colors.blue
-                              : Colors.grey,
-                ),
-              ),
-              const SizedBox(width: 16),
-
-              // Event info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      event.name,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
+              Row(
+                children: [
+                  // Status indicator with icon
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: isBroadcasting
+                          ? Colors.green.withOpacity(0.1)
+                          : eventNotFound
+                              ? Colors.red.withOpacity(0.1)
+                              : isActive
+                                  ? Colors.blue.withOpacity(0.1)
+                                  : Colors.grey.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    const SizedBox(height: 4),
-                    Row(
+                    child: Icon(
+                      isBroadcasting
+                          ? Icons.broadcast_on_personal
+                          : eventNotFound
+                              ? Icons.error_outline
+                              : isActive
+                                  ? Icons.event_available
+                                  : Icons.event_busy,
+                      color: isBroadcasting
+                          ? Colors.green
+                          : eventNotFound
+                              ? Colors.red
+                              : isActive
+                                  ? Colors.blue
+                                  : Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+
+                  // Event info
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                event.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            // Created date
+                            Text(
+                              formatDate(event.createdAt),
+                              style: TextStyle(
+                                color: isDark ? Colors.grey[500] : Colors.grey[500],
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        // Status badge with icon (colorblind accessible)
                         _StatusBadge(
                           label: isBroadcasting
                               ? 'Broadcasting'
@@ -328,6 +504,13 @@ class _EventCard extends StatelessWidget {
                                   : isActive
                                       ? 'Active'
                                       : 'Ended',
+                          icon: isBroadcasting
+                              ? Icons.sensors
+                              : eventNotFound
+                                  ? Icons.error
+                                  : isActive
+                                      ? Icons.check_circle
+                                      : Icons.flag,
                           color: isBroadcasting
                               ? Colors.green
                               : eventNotFound
@@ -336,25 +519,73 @@ class _EventCard extends StatelessWidget {
                                       ? Colors.blue
                                       : Colors.grey,
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'ID: ${event.id}',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 12,
-                          ),
-                        ),
                       ],
+                    ),
+                  ),
+
+                  // Remove button
+                  IconButton(
+                    onPressed: onRemove,
+                    icon: const Icon(Icons.close, size: 20),
+                    color: isDark ? Colors.grey[500] : Colors.grey[400],
+                  ),
+                ],
+              ),
+
+              // Event ID row with copy button
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey[800]?.withOpacity(0.5) : Colors.grey[100],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.tag,
+                      size: 14,
+                      color: isDark ? Colors.grey[500] : Colors.grey[500],
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        event.id,
+                        style: TextStyle(
+                          color: isDark ? Colors.grey[400] : Colors.grey[600],
+                          fontSize: 13,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                    ),
+                    InkWell(
+                      onTap: onCopyId,
+                      borderRadius: BorderRadius.circular(4),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.copy,
+                              size: 14,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Copy',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ),
-              ),
-
-              // Actions
-              IconButton(
-                onPressed: onRemove,
-                icon: const Icon(Icons.close, size: 20),
-                color: Colors.grey[400],
               ),
             ],
           ),
@@ -366,28 +597,37 @@ class _EventCard extends StatelessWidget {
 
 class _StatusBadge extends StatelessWidget {
   final String label;
+  final IconData icon;
   final Color color;
 
   const _StatusBadge({
     required this.label,
+    required this.icon,
     required this.color,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(4),
       ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }
