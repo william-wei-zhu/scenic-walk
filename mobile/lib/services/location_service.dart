@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -49,6 +50,58 @@ class LocationService {
   static Future<bool> hasBackgroundPermission() async {
     final status = await Permission.locationAlways.status;
     return status.isGranted;
+  }
+
+  /// Check if notification permission is granted (Android 13+)
+  static Future<bool> hasNotificationPermission() async {
+    // Only needed for Android 13+ (API 33+)
+    if (!Platform.isAndroid) return true;
+
+    final status = await Permission.notification.status;
+    return status.isGranted;
+  }
+
+  /// Request notification permission (Android 13+)
+  /// Returns true if granted, false otherwise
+  static Future<bool> requestNotificationPermission() async {
+    // Only needed for Android 13+ (API 33+)
+    if (!Platform.isAndroid) return true;
+
+    final status = await Permission.notification.request();
+    return status.isGranted;
+  }
+
+  /// Check all permissions needed for broadcasting
+  /// Returns a result indicating if all permissions are granted
+  static Future<BroadcastPermissionResult> checkBroadcastPermissions() async {
+    final locationResult = await checkPermissions();
+    if (!locationResult.granted) {
+      return BroadcastPermissionResult(
+        granted: false,
+        message: locationResult.message,
+        missingPermission: 'location',
+      );
+    }
+
+    final hasBackground = await hasBackgroundPermission();
+    if (!hasBackground) {
+      return BroadcastPermissionResult(
+        granted: false,
+        message: 'Background location permission is required for continuous broadcasting.',
+        missingPermission: 'backgroundLocation',
+      );
+    }
+
+    final hasNotification = await hasNotificationPermission();
+    if (!hasNotification) {
+      return BroadcastPermissionResult(
+        granted: false,
+        message: 'Notification permission is required to show broadcasting status.',
+        missingPermission: 'notification',
+      );
+    }
+
+    return BroadcastPermissionResult(granted: true);
   }
 
   /// Get current position once
@@ -118,5 +171,17 @@ class LocationPermissionResult {
   LocationPermissionResult({
     required this.granted,
     this.message,
+  });
+}
+
+class BroadcastPermissionResult {
+  final bool granted;
+  final String? message;
+  final String? missingPermission;
+
+  BroadcastPermissionResult({
+    required this.granted,
+    this.message,
+    this.missingPermission,
   });
 }

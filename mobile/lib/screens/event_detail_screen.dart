@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:share_plus/share_plus.dart';
+import '../config/app_config.dart';
 import '../services/storage_service.dart';
 import '../services/firebase_service.dart';
 import '../services/location_service.dart';
@@ -157,6 +158,16 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       }
     }
 
+    // Check notification permission (Android 13+)
+    final hasNotificationPermission = await LocationService.hasNotificationPermission();
+    if (!hasNotificationPermission) {
+      final granted = await LocationService.requestNotificationPermission();
+      if (!granted) {
+        setState(() => _errorMessage = 'Notification permission is required to show broadcasting status. Please enable it in settings.');
+        return;
+      }
+    }
+
     // Start background service
     await BackgroundService.startService(
       widget.savedEvent.id,
@@ -221,7 +232,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   }
 
   void _shareEventLink() async {
-    final eventUrl = 'https://scenic-walk-484001.web.app/#/${widget.savedEvent.id}';
+    final eventUrl = AppConfig.getEventShareUrl(widget.savedEvent.id);
     final eventName = _event?.name ?? widget.savedEvent.name;
 
     try {
@@ -292,7 +303,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       );
     }
 
-    final isActive = _event!.isActive;
+    // Use local variable to avoid force unwraps after null check
+    final event = _event!;
+    final isActive = event.isActive;
 
     return Scaffold(
       appBar: AppBar(
@@ -480,7 +493,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             const SizedBox(height: 12),
             _InfoRow(
               label: 'Event ID',
-              value: _event!.id,
+              value: event.id,
               onCopy: _copyEventId,
               isDark: isDark,
             ),
@@ -492,13 +505,13 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             ),
             _InfoRow(
               label: 'Created',
-              value: _formatDate(DateTime.fromMillisecondsSinceEpoch(_event!.createdAt)),
+              value: _formatDate(DateTime.fromMillisecondsSinceEpoch(event.createdAt)),
               isDark: isDark,
             ),
-            if (_event!.route.isNotEmpty)
+            if (event.route.isNotEmpty)
               _InfoRow(
                 label: 'Route',
-                value: '${_event!.route.length} points',
+                value: '${event.route.length} points',
                 isDark: isDark,
               ),
 

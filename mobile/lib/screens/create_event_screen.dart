@@ -211,7 +211,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
             ),
         ],
       ),
-      body: _isLoading
+      body: _isLoading || _initialPosition == null
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
@@ -222,7 +222,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                     children: [
                       GoogleMap(
                         initialCameraPosition: CameraPosition(
-                          target: _initialPosition!,
+                          target: _initialPosition!,  // Safe: null check above
                           zoom: 15,
                         ),
                         onMapCreated: (controller) {
