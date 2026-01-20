@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -5,6 +6,7 @@ import '../main.dart';
 import '../services/storage_service.dart';
 import '../services/firebase_service.dart';
 import '../services/background_service.dart';
+import '../services/connectivity_service.dart';
 import 'add_event_screen.dart';
 import 'create_event_screen.dart';
 import 'event_detail_screen.dart';
@@ -21,11 +23,28 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, WalkEvent?> _eventDetails = {};
   String? _broadcastingEventId;
   bool _isLoading = true;
+  bool _isOffline = false;
+  StreamSubscription<bool>? _connectivitySubscription;
 
   @override
   void initState() {
     super.initState();
+    _isOffline = !ConnectivityService.isConnected;
+    _connectivitySubscription = ConnectivityService.onConnectivityChanged.listen((isConnected) {
+      if (mounted) {
+        setState(() => _isOffline = !isConnected);
+        if (isConnected) {
+          _loadEvents(); // Refresh when back online
+        }
+      }
+    });
     _loadEvents();
+  }
+
+  @override
+  void dispose() {
+    _connectivitySubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadEvents() async {
@@ -136,6 +155,40 @@ class _HomeScreenState extends State<HomeScreen> {
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
+              // Offline banner
+              if (_isOffline)
+                SliverToBoxAdapter(
+                  child: Container(
+                    color: Colors.orange[700],
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.wifi_off, color: Colors.white, size: 18),
+                        const SizedBox(width: 8),
+                        const Expanded(
+                          child: Text(
+                            'You\'re offline. Some features may not work.',
+                            style: TextStyle(color: Colors.white, fontSize: 13),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            final isConnected = await ConnectivityService.checkConnectivity();
+                            if (isConnected) {
+                              _loadEvents();
+                            }
+                          },
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                          ),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
               // Header with dark mode toggle
               SliverToBoxAdapter(
                 child: Padding(
