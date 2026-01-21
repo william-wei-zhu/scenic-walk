@@ -109,7 +109,7 @@ class _ScenicWalkAppState extends State<ScenicWalkApp> {
           borderSide: BorderSide(color: primaryColor, width: 2),
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 1,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -169,14 +169,14 @@ class _ScenicWalkAppState extends State<ScenicWalkApp> {
         filled: true,
         fillColor: const Color(0xFF262626), // stone-800
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 1,
         color: const Color(0xFF171717), // stone-900
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
       ),
-      dialogTheme: const DialogTheme(
+      dialogTheme: const DialogThemeData(
         backgroundColor: Color(0xFF171717),
       ),
       snackBarTheme: const SnackBarThemeData(
