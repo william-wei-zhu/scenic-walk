@@ -290,8 +290,17 @@ All status indicators use icons + text labels alongside colors:
 ### Mobile App API Keys
 - **Google Maps**: Configured via `android/local.properties` (gitignored)
   - Requires "Maps SDK for Android" enabled
-  - Add both debug and release SHA-1 fingerprints for API key restrictions
+  - Add these SHA-1 fingerprints to API key restrictions:
+    - Debug: `66:F8:64:8D:40:B9:F3:D9:85:FC:AC:67:33:5F:DC:2B:19:E4:CF:BB`
+    - Release (upload key): `19:26:93:0D:C6:C2:DF:C7:A5:35:D0:64:B2:72:89:4E:F3:1B:7C:59`
+    - Google Play signing: `28:FA:B5:8E:D7:79:19:17:DB:DE:5E:59:B0:6F:3A:0C:BB:A0:48:B1`
 - **Firebase**: `google-services.json` in `android/app/`
+
+### Google Play Store
+- **Package name**: `com.scenicwalk.scenic_walk`
+- **App signing**: Google Play re-signs the app; get SHA-1 from Play Console → Setup → App integrity
+- **Store assets**: `mobile/store_assets/`
+- **Privacy policy**: `PRIVACY_POLICY.md` (also at repo root)
 
 ### Mobile App Production URL
 Share links use `https://scenic-walk.com` (configured in `lib/config/app_config.dart`)
