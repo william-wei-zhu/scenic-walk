@@ -1,0 +1,70 @@
+================================================================================
+GOOGLE PLAY STORE LISTING
+================================================================================
+
+APP NAME: Scenic Walk
+
+--------------------------------------------------------------------------------
+SHORT DESCRIPTION (80 chars max):
+--------------------------------------------------------------------------------
+Never lose your walking group again. Live GPS sharing for group walks & hikes.
+
+(76 characters)
+
+--------------------------------------------------------------------------------
+FULL DESCRIPTION (4000 chars max):
+--------------------------------------------------------------------------------
+Never lose your walking group again!
+
+Scenic Walk makes it easy to organize group walks, guided tours, hikes, and outdoor activities with real-time GPS location sharing. Whether you're leading a nature walk, a city tour, or a community hike, participants can always see where you are on the map.
+
+FEATURES FOR ORGANIZERS:
+
+• Create Events - Draw your walking route on an interactive map with tap-to-add points. Set a name and secure PIN for your event.
+
+• Live GPS Broadcasting - Share your real-time location with all participants. Broadcasting continues even when your phone is locked or the app is in the background.
+
+• Easy Sharing - Share your event with a simple link. Participants can follow along on any device with a web browser - no app download required for them!
+
+• Privacy Protection - Your location is only shared while you're actively broadcasting. Stop anytime and your location is immediately removed.
+
+HOW IT WORKS:
+
+1. Create an event and draw your planned route
+2. Share the event link with your group
+3. Start broadcasting when you begin walking
+4. Participants see your live location on the map
+5. Stop broadcasting when you're done
+
+PERFECT FOR:
+
+• Community walking groups
+• Guided city tours
+• Nature hikes and trail walks
+• School or organization outings
+• Bird watching groups
+• Photography walks
+• Dog walking meetups
+• Running clubs
+
+PRIVACY & BATTERY:
+
+• Location is only shared when you choose to broadcast
+• Efficient background service minimizes battery usage
+• No account required - events are stored locally on your device
+• Open source (AGPL-3.0) - verify the code yourself at github.com/william-wei-zhu/scenic-walk
+
+Download Scenic Walk today and never lose your group again!
+
+--------------------------------------------------------------------------------
+CATEGORY: Health & Fitness (or Maps & Navigation)
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+CONTENT RATING: Everyone
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+TAGS/KEYWORDS:
+--------------------------------------------------------------------------------
+walking, hiking, GPS, group walks, location sharing, outdoor, fitness, walking group, tour guide, nature walk, community walk, live tracking
