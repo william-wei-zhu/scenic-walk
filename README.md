@@ -6,6 +6,7 @@ Create walking events, draw routes on a map, and share your live location with p
 
 ## Features
 
+### Web App (Participants + Organizers)
 - **Live GPS Broadcasting** - Share your real-time location with participants
 - **Custom Route Drawing** - Plan your walk by clicking points on the map
 - **Easy Sharing** - Simple shareable links, no app downloads required
@@ -13,7 +14,16 @@ Create walking events, draw routes on a map, and share your live location with p
 - **My Events** - Return to your events anytime (saved locally on device)
 - **Dark Mode** - Full dark theme support
 - **Mobile Responsive** - Works on phones, tablets, and desktops
-- **Android App** - Background location broadcasting for organizers
+- **Advanced Markers** - Custom orange flag marker with walking emoji for organizer location
+
+### Android App (Organizers)
+- **Create Events** - Draw routes directly on an interactive map
+- **Background Broadcasting** - Location updates continue when app is backgrounded or screen locked
+- **Custom Organizer Marker** - Orange flag with walking emoji (matches web)
+- **Map Controls** - Zoom in/out, center on location, show all
+- **My Location Button** - Quick navigation to current position
+- **Dark Mode** - Full dark theme support
+- **Share Links** - Easy sharing to participants via `scenic-walk.com`
 
 ## Quick Start
 
@@ -124,8 +134,9 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 1. Open the participant link shared by the organizer
 2. Wait for the organizer to start broadcasting
-3. The orange flag shows the organizer's live location
-4. Green = route start, Red = route end
+3. The orange flag with walking emoji (🚶) shows the organizer's live location
+4. Green marker = route start, Red marker = route end
+5. Green line = planned walking route
 
 ## Project Structure
 
@@ -209,16 +220,28 @@ The output will be in the `web/dist/` directory.
 
 ### Mobile App (Android APK)
 
-The Flutter Android app allows organizers to broadcast their location even when the phone is locked.
+The Flutter Android app allows organizers to create events and broadcast their location even when the phone is locked.
 
-**Build locally:**
+**Setup:**
 ```bash
 cd mobile
 flutter pub get
+```
+
+Create `android/local.properties` with your Google Maps API key:
+```properties
+sdk.dir=/path/to/android/sdk
+MAPS_API_KEY=your_google_maps_api_key
+```
+
+**Build locally:**
+```bash
 flutter build apk --release
 ```
 
 **CI/CD:** Pushing changes to `mobile/` triggers GitHub Actions to build the APK, which is available as a workflow artifact.
+
+See [mobile/README.md](mobile/README.md) for detailed setup instructions.
 
 ### Alternative Hosting
 

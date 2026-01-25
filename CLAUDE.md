@@ -94,21 +94,25 @@ web/
 ```
 mobile/
 ├── lib/
-│   ├── main.dart               # App entry, Firebase init, theme
+│   ├── main.dart                    # App entry, Firebase init, theme
+│   ├── config/
+│   │   └── app_config.dart          # App configuration (URLs, colors)
 │   ├── screens/
-│   │   ├── home_screen.dart    # Event list, add event button
+│   │   ├── home_screen.dart         # Event list, navigation
+│   │   ├── create_event_screen.dart # Create event with route drawing on map
 │   │   ├── add_event_screen.dart    # Enter event ID + PIN
-│   │   └── event_detail_screen.dart # Broadcast controls, status
+│   │   └── event_detail_screen.dart # Map view + broadcast controls
 │   └── services/
-│       ├── firebase_service.dart    # Firebase read/write
+│       ├── firebase_service.dart    # Firebase read/write + live location stream
 │       ├── storage_service.dart     # SharedPreferences for events
-│       ├── location_service.dart    # Foreground location
+│       ├── location_service.dart    # Foreground location + permissions
 │       └── background_service.dart  # Background location service
 ├── android/
 │   ├── app/
 │   │   ├── build.gradle.kts
 │   │   ├── google-services.json     # Firebase config
 │   │   └── src/main/AndroidManifest.xml
+│   ├── local.properties             # API keys (gitignored)
 │   └── build.gradle.kts
 └── pubspec.yaml
 ```
@@ -261,3 +265,24 @@ All status indicators use icons + text labels alongside colors:
 - Maps use full-width layout (no max-w constraints)
 - Mobile map height: 65vh, Desktop: flex-1
 - Homepage: Logo + tagline + CTA button + My Events list (if any)
+
+### Mobile App Map Features
+- **Create Event Screen**: Interactive map for drawing routes by tapping
+  - "My Location" button to center on current position
+  - Zoom in/out controls
+  - Route polyline (green) with start (green) and end (red) markers
+- **Event Detail Screen**: Map showing route + organizer location
+  - Custom orange flag marker with walking emoji (🚶) for organizer
+  - "Center on Organizer" button
+  - "Show All" button to fit route + organizer in view
+  - Zoom in/out controls
+  - Live location updates from Firebase
+
+### Mobile App API Keys
+- **Google Maps**: Configured via `android/local.properties` (gitignored)
+  - Requires "Maps SDK for Android" enabled
+  - Add both debug and release SHA-1 fingerprints for API key restrictions
+- **Firebase**: `google-services.json` in `android/app/`
+
+### Mobile App Production URL
+Share links use `https://scenic-walk.com` (configured in `lib/config/app_config.dart`)

@@ -111,6 +111,14 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     }
   }
 
+  void _zoomIn() {
+    _mapController?.animateCamera(CameraUpdate.zoomIn());
+  }
+
+  void _zoomOut() {
+    _mapController?.animateCamera(CameraUpdate.zoomOut());
+  }
+
   Future<void> _createEvent() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -294,6 +302,24 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                           ),
                         ),
                       ),
+                      // Zoom controls
+                      Positioned(
+                        bottom: 16,
+                        right: 16,
+                        child: Column(
+                          children: [
+                            _ZoomButton(
+                              icon: Icons.add,
+                              onTap: _zoomIn,
+                            ),
+                            const SizedBox(height: 8),
+                            _ZoomButton(
+                              icon: Icons.remove,
+                              onTap: _zoomOut,
+                            ),
+                          ],
+                        ),
+                      ),
                       // Instructions overlay
                       Positioned(
                         top: 16,
@@ -454,6 +480,33 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                 ),
               ],
             ),
+    );
+  }
+}
+
+class _ZoomButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _ZoomButton({
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(8),
+      elevation: 4,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Icon(icon, color: Colors.grey[700], size: 22),
+        ),
+      ),
     );
   }
 }
