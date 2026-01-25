@@ -8,7 +8,7 @@ class AppConfig {
 
   /// The base URL for the web app (used for sharing event links)
   /// Update this if you deploy to a custom domain
-  static const String webAppBaseUrl = 'https://scenic-walk-svc2radhbq-uw.a.run.app';
+  static const String webAppBaseUrl = 'https://scenic-walk.com';
 
   /// App name displayed throughout the UI
   static const String appName = 'Scenic Walk';
