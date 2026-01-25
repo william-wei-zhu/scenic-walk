@@ -85,6 +85,32 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     });
   }
 
+  Future<void> _goToCurrentLocation() async {
+    final permissionResult = await LocationService.checkPermissions();
+    if (!permissionResult.granted) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(permissionResult.message ?? 'Location permission required')),
+        );
+      }
+      return;
+    }
+
+    try {
+      final position = await Geolocator.getCurrentPosition();
+      final latLng = LatLng(position.latitude, position.longitude);
+      _mapController?.animateCamera(
+        CameraUpdate.newLatLngZoom(latLng, 16),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not get current location')),
+        );
+      }
+    }
+  }
+
   Future<void> _createEvent() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -232,9 +258,41 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                         markers: _buildMarkers(),
                         polylines: _buildPolylines(),
                         myLocationEnabled: true,
-                        myLocationButtonEnabled: true,
+                        myLocationButtonEnabled: false,
                         zoomControlsEnabled: false,
                         mapToolbarEnabled: false,
+                      ),
+                      // My Location button
+                      Positioned(
+                        bottom: 16,
+                        left: 16,
+                        child: Material(
+                          color: Colors.green,
+                          borderRadius: BorderRadius.circular(8),
+                          elevation: 4,
+                          child: InkWell(
+                            onTap: _goToCurrentLocation,
+                            borderRadius: BorderRadius.circular(8),
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.my_location, color: Colors.white, size: 18),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'My Location',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                       // Instructions overlay
                       Positioned(

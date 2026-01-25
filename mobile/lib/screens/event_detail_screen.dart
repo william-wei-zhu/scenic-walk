@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../config/app_config.dart';
 import '../services/storage_service.dart';
 import '../services/firebase_service.dart';
@@ -29,6 +30,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   StreamSubscription? _eventSubscription;
   StreamSubscription? _locationSubscription;
 
+  // Map related
+  GoogleMapController? _mapController;
+  StreamSubscription? _liveLocationSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -36,12 +41,15 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     _checkBroadcastStatus();
     _checkBackgroundPermission();
     _listenToBackgroundUpdates();
+    _listenToLiveLocation();
   }
 
   @override
   void dispose() {
     _eventSubscription?.cancel();
     _locationSubscription?.cancel();
+    _liveLocationSubscription?.cancel();
+    _mapController?.dispose();
     super.dispose();
   }
 
@@ -65,6 +73,136 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         });
       }
     });
+  }
+
+  void _listenToLiveLocation() {
+    _liveLocationSubscription = FirebaseService.listenToLocation(widget.savedEvent.id).listen((location) {
+      if (location != null && mounted) {
+        setState(() {
+          _lastPosition = Position(
+            latitude: location.lat,
+            longitude: location.lng,
+            timestamp: DateTime.fromMillisecondsSinceEpoch(location.timestamp),
+            accuracy: location.accuracy ?? 0,
+            altitude: 0,
+            altitudeAccuracy: 0,
+            heading: 0,
+            headingAccuracy: 0,
+            speed: 0,
+            speedAccuracy: 0,
+          );
+          _lastUpdateTime = DateTime.fromMillisecondsSinceEpoch(location.timestamp);
+        });
+      }
+    });
+  }
+
+  void _centerOnOrganizer() {
+    if (_mapController != null && _lastPosition != null) {
+      _mapController!.animateCamera(
+        CameraUpdate.newLatLngZoom(
+          LatLng(_lastPosition!.latitude, _lastPosition!.longitude),
+          16,
+        ),
+      );
+    }
+  }
+
+  void _fitBoundsToAll() {
+    if (_mapController == null || _event == null) return;
+
+    final route = _event!.route;
+    if (route.isEmpty) return;
+
+    double minLat = route.first['lat']!;
+    double maxLat = route.first['lat']!;
+    double minLng = route.first['lng']!;
+    double maxLng = route.first['lng']!;
+
+    for (final point in route) {
+      minLat = minLat < point['lat']! ? minLat : point['lat']!;
+      maxLat = maxLat > point['lat']! ? maxLat : point['lat']!;
+      minLng = minLng < point['lng']! ? minLng : point['lng']!;
+      maxLng = maxLng > point['lng']! ? maxLng : point['lng']!;
+    }
+
+    // Include organizer position if available
+    if (_lastPosition != null) {
+      minLat = minLat < _lastPosition!.latitude ? minLat : _lastPosition!.latitude;
+      maxLat = maxLat > _lastPosition!.latitude ? maxLat : _lastPosition!.latitude;
+      minLng = minLng < _lastPosition!.longitude ? minLng : _lastPosition!.longitude;
+      maxLng = maxLng > _lastPosition!.longitude ? maxLng : _lastPosition!.longitude;
+    }
+
+    _mapController!.animateCamera(
+      CameraUpdate.newLatLngBounds(
+        LatLngBounds(
+          southwest: LatLng(minLat, minLng),
+          northeast: LatLng(maxLat, maxLng),
+        ),
+        50,
+      ),
+    );
+  }
+
+  Set<Marker> _buildMarkers() {
+    final markers = <Marker>{};
+    final route = _event?.route ?? [];
+
+    if (route.isNotEmpty) {
+      // Start marker (green)
+      markers.add(Marker(
+        markerId: const MarkerId('start'),
+        position: LatLng(route.first['lat']!, route.first['lng']!),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        infoWindow: const InfoWindow(title: 'Start'),
+      ));
+
+      // End marker (red) if more than one point
+      if (route.length > 1) {
+        markers.add(Marker(
+          markerId: const MarkerId('end'),
+          position: LatLng(route.last['lat']!, route.last['lng']!),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+          infoWindow: const InfoWindow(title: 'End'),
+        ));
+      }
+    }
+
+    // Organizer location marker (orange)
+    if (_lastPosition != null) {
+      markers.add(Marker(
+        markerId: const MarkerId('organizer'),
+        position: LatLng(_lastPosition!.latitude, _lastPosition!.longitude),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+        infoWindow: const InfoWindow(title: 'Organizer'),
+      ));
+    }
+
+    return markers;
+  }
+
+  Set<Polyline> _buildPolylines() {
+    final route = _event?.route ?? [];
+    if (route.length < 2) return {};
+
+    return {
+      Polyline(
+        polylineId: const PolylineId('route'),
+        points: route.map((p) => LatLng(p['lat']!, p['lng']!)).toList(),
+        color: const Color(0xFF16a34a), // green-600
+        width: 4,
+      ),
+    };
+  }
+
+  LatLng _getInitialCameraPosition() {
+    final route = _event?.route ?? [];
+    if (route.isNotEmpty) {
+      return LatLng(route.first['lat']!, route.first['lng']!);
+    }
+    // Default to San Francisco
+    return const LatLng(37.7749, -122.4194);
   }
 
   Future<void> _loadEvent() async {
@@ -323,11 +461,100 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      body: Column(
+        children: [
+          // Map section
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.4,
+            child: Stack(
+              children: [
+                GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: _getInitialCameraPosition(),
+                    zoom: 15,
+                  ),
+                  onMapCreated: (controller) {
+                    _mapController = controller;
+                    // Fit bounds after map is created
+                    Future.delayed(const Duration(milliseconds: 500), () {
+                      if (mounted) _fitBoundsToAll();
+                    });
+                  },
+                  markers: _buildMarkers(),
+                  polylines: _buildPolylines(),
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: false,
+                  zoomControlsEnabled: false,
+                  mapToolbarEnabled: false,
+                ),
+                // Map control buttons
+                Positioned(
+                  top: 12,
+                  left: 12,
+                  child: Column(
+                    children: [
+                      if (_lastPosition != null)
+                        _MapButton(
+                          onPressed: _centerOnOrganizer,
+                          icon: Icons.person_pin_circle,
+                          label: 'Center on Organizer',
+                          isPrimary: true,
+                        ),
+                      const SizedBox(height: 8),
+                      _MapButton(
+                        onPressed: _fitBoundsToAll,
+                        icon: Icons.zoom_out_map,
+                        label: 'Show All',
+                        isPrimary: false,
+                      ),
+                    ],
+                  ),
+                ),
+                // Broadcasting indicator overlay
+                if (_isBroadcasting)
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.broadcast_on_personal, color: Colors.white, size: 16),
+                          SizedBox(width: 4),
+                          Text(
+                            'Broadcasting',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+
+          // Controls section (scrollable)
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
             // Status card
             Container(
               width: double.infinity,
@@ -586,8 +813,11 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 isDark: isDark,
               ),
             ],
-          ],
-        ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -656,6 +886,55 @@ class _InfoRow extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _MapButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  final IconData icon;
+  final String label;
+  final bool isPrimary;
+
+  const _MapButton({
+    required this.onPressed,
+    required this.icon,
+    required this.label,
+    required this.isPrimary,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: isPrimary ? Colors.green : Colors.white,
+      borderRadius: BorderRadius.circular(8),
+      elevation: 2,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 18,
+                color: isPrimary ? Colors.white : Colors.grey[700],
+              ),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: isPrimary ? Colors.white : Colors.grey[700],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
