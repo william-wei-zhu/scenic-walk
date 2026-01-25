@@ -488,11 +488,12 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     }
   }
 
-  void _copyEventId() {
-    Clipboard.setData(ClipboardData(text: widget.savedEvent.id));
+  void _copyEventLink() {
+    final link = AppConfig.getEventShareUrl(widget.savedEvent.id);
+    Clipboard.setData(ClipboardData(text: link));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Event ID copied to clipboard'),
+        content: Text('Event link copied to clipboard'),
         duration: Duration(seconds: 2),
       ),
     );
@@ -837,20 +838,16 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             ),
             const SizedBox(height: 12),
             _InfoRow(
-              label: 'Event ID',
-              value: event.id,
-              onCopy: _copyEventId,
+              label: 'Event Link',
+              value: AppConfig.getEventShareUrl(event.id),
+              onCopy: _copyEventLink,
               isDark: isDark,
+              isLink: true,
             ),
             _InfoRow(
               label: 'Status',
               value: isActive ? 'Active' : 'Ended',
               valueColor: isActive ? Colors.green : Colors.grey,
-              isDark: isDark,
-            ),
-            _InfoRow(
-              label: 'Created',
-              value: _formatDate(DateTime.fromMillisecondsSinceEpoch(event.createdAt)),
               isDark: isDark,
             ),
 
@@ -910,10 +907,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   String _formatTime(DateTime time) {
     return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}:${time.second.toString().padLeft(2, '0')}';
   }
-
-  String _formatDate(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-  }
 }
 
 class _InfoRow extends StatelessWidget {
@@ -922,6 +915,7 @@ class _InfoRow extends StatelessWidget {
   final Color? valueColor;
   final VoidCallback? onCopy;
   final bool isDark;
+  final bool isLink;
 
   const _InfoRow({
     required this.label,
@@ -929,7 +923,17 @@ class _InfoRow extends StatelessWidget {
     this.valueColor,
     this.onCopy,
     required this.isDark,
+    this.isLink = false,
   });
+
+  String _truncateLink(String link) {
+    // Remove https:// prefix and truncate if too long
+    String display = link.replaceFirst('https://', '');
+    if (display.length > 28) {
+      return '${display.substring(0, 25)}...';
+    }
+    return display;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -942,33 +946,38 @@ class _InfoRow extends StatelessWidget {
             label,
             style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600]),
           ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                value,
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  color: valueColor,
-                  fontFamily: label == 'Event ID' ? 'monospace' : null,
-                ),
-              ),
-              if (onCopy != null) ...[
-                const SizedBox(width: 8),
-                InkWell(
-                  onTap: onCopy,
-                  borderRadius: BorderRadius.circular(4),
-                  child: Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: Icon(
-                      Icons.copy,
-                      size: 16,
-                      color: Theme.of(context).colorScheme.primary,
+          Flexible(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
+                    isLink ? _truncateLink(value) : value,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      color: isLink ? Theme.of(context).colorScheme.primary : valueColor,
+                      fontSize: isLink ? 13 : null,
                     ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                if (onCopy != null) ...[
+                  const SizedBox(width: 8),
+                  InkWell(
+                    onTap: onCopy,
+                    borderRadius: BorderRadius.circular(4),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: Icon(
+                        Icons.copy,
+                        size: 16,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ],
       ),
