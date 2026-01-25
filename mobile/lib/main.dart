@@ -62,24 +62,24 @@ class _ScenicWalkAppState extends State<ScenicWalkApp> {
   // Primary color matching web app's green-600
   static const Color primaryColor = Color(0xFF16a34a);
 
-  // Create a scaled-up text theme for better readability
+  // Create a scaled-up text theme for better readability (minimum 24px)
   TextTheme _buildScaledTextTheme(TextTheme base) {
     return base.copyWith(
-      displayLarge: base.displayLarge?.copyWith(fontSize: 60),
-      displayMedium: base.displayMedium?.copyWith(fontSize: 48),
-      displaySmall: base.displaySmall?.copyWith(fontSize: 38),
-      headlineLarge: base.headlineLarge?.copyWith(fontSize: 34),
-      headlineMedium: base.headlineMedium?.copyWith(fontSize: 30),
-      headlineSmall: base.headlineSmall?.copyWith(fontSize: 26),
-      titleLarge: base.titleLarge?.copyWith(fontSize: 24),
-      titleMedium: base.titleMedium?.copyWith(fontSize: 18),
-      titleSmall: base.titleSmall?.copyWith(fontSize: 16),
-      bodyLarge: base.bodyLarge?.copyWith(fontSize: 18),
-      bodyMedium: base.bodyMedium?.copyWith(fontSize: 16),
-      bodySmall: base.bodySmall?.copyWith(fontSize: 14),
-      labelLarge: base.labelLarge?.copyWith(fontSize: 16),
-      labelMedium: base.labelMedium?.copyWith(fontSize: 14),
-      labelSmall: base.labelSmall?.copyWith(fontSize: 12),
+      displayLarge: base.displayLarge?.copyWith(fontSize: 72),
+      displayMedium: base.displayMedium?.copyWith(fontSize: 60),
+      displaySmall: base.displaySmall?.copyWith(fontSize: 48),
+      headlineLarge: base.headlineLarge?.copyWith(fontSize: 40),
+      headlineMedium: base.headlineMedium?.copyWith(fontSize: 36),
+      headlineSmall: base.headlineSmall?.copyWith(fontSize: 32),
+      titleLarge: base.titleLarge?.copyWith(fontSize: 28),
+      titleMedium: base.titleMedium?.copyWith(fontSize: 26),
+      titleSmall: base.titleSmall?.copyWith(fontSize: 24),
+      bodyLarge: base.bodyLarge?.copyWith(fontSize: 26),
+      bodyMedium: base.bodyMedium?.copyWith(fontSize: 24),
+      bodySmall: base.bodySmall?.copyWith(fontSize: 24),
+      labelLarge: base.labelLarge?.copyWith(fontSize: 26),
+      labelMedium: base.labelMedium?.copyWith(fontSize: 24),
+      labelSmall: base.labelSmall?.copyWith(fontSize: 24),
     );
   }
 
@@ -99,7 +99,7 @@ class _ScenicWalkAppState extends State<ScenicWalkApp> {
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
         titleTextStyle: GoogleFonts.nunito(
-          fontSize: 22,
+          fontSize: 26,
           fontWeight: FontWeight.w600,
           color: Colors.white,
         ),
@@ -159,7 +159,7 @@ class _ScenicWalkAppState extends State<ScenicWalkApp> {
         backgroundColor: const Color(0xFF171717), // stone-900
         foregroundColor: Colors.white,
         titleTextStyle: GoogleFonts.nunito(
-          fontSize: 22,
+          fontSize: 26,
           fontWeight: FontWeight.w600,
           color: Colors.white,
         ),
