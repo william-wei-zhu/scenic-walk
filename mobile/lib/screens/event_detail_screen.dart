@@ -499,6 +499,16 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     );
   }
 
+  void _copyToClipboard(String text, String label) {
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$label copied to clipboard'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -837,6 +847,12 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   ),
             ),
             const SizedBox(height: 12),
+            _InfoRow(
+              label: 'Event ID',
+              value: event.id,
+              onCopy: () => _copyToClipboard(event.id, 'Event ID'),
+              isDark: isDark,
+            ),
             _InfoRow(
               label: 'Event Link',
               value: AppConfig.getEventShareUrl(event.id),

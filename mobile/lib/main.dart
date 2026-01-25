@@ -62,20 +62,44 @@ class _ScenicWalkAppState extends State<ScenicWalkApp> {
   // Primary color matching web app's green-600
   static const Color primaryColor = Color(0xFF16a34a);
 
+  // Create a scaled-up text theme for better readability
+  TextTheme _buildScaledTextTheme(TextTheme base) {
+    return base.copyWith(
+      displayLarge: base.displayLarge?.copyWith(fontSize: 60),
+      displayMedium: base.displayMedium?.copyWith(fontSize: 48),
+      displaySmall: base.displaySmall?.copyWith(fontSize: 38),
+      headlineLarge: base.headlineLarge?.copyWith(fontSize: 34),
+      headlineMedium: base.headlineMedium?.copyWith(fontSize: 30),
+      headlineSmall: base.headlineSmall?.copyWith(fontSize: 26),
+      titleLarge: base.titleLarge?.copyWith(fontSize: 24),
+      titleMedium: base.titleMedium?.copyWith(fontSize: 18),
+      titleSmall: base.titleSmall?.copyWith(fontSize: 16),
+      bodyLarge: base.bodyLarge?.copyWith(fontSize: 18),
+      bodyMedium: base.bodyMedium?.copyWith(fontSize: 16),
+      bodySmall: base.bodySmall?.copyWith(fontSize: 14),
+      labelLarge: base.labelLarge?.copyWith(fontSize: 16),
+      labelMedium: base.labelMedium?.copyWith(fontSize: 14),
+      labelSmall: base.labelSmall?.copyWith(fontSize: 12),
+    );
+  }
+
   ThemeData _buildLightTheme() {
+    final baseTextTheme = GoogleFonts.nunitoTextTheme();
+    final scaledTextTheme = _buildScaledTextTheme(baseTextTheme);
+
     return ThemeData(
       colorScheme: ColorScheme.fromSeed(
         seedColor: primaryColor,
         brightness: Brightness.light,
       ),
-      textTheme: GoogleFonts.nunitoTextTheme(),
+      textTheme: scaledTextTheme,
       useMaterial3: true,
       scaffoldBackgroundColor: Colors.white,
       appBarTheme: AppBarTheme(
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
         titleTextStyle: GoogleFonts.nunito(
-          fontSize: 20,
+          fontSize: 22,
           fontWeight: FontWeight.w600,
           color: Colors.white,
         ),
@@ -123,17 +147,19 @@ class _ScenicWalkAppState extends State<ScenicWalkApp> {
       seedColor: primaryColor,
       brightness: Brightness.dark,
     );
+    final baseTextTheme = GoogleFonts.nunitoTextTheme(ThemeData.dark().textTheme);
+    final scaledTextTheme = _buildScaledTextTheme(baseTextTheme);
 
     return ThemeData(
       colorScheme: darkColorScheme,
-      textTheme: GoogleFonts.nunitoTextTheme(ThemeData.dark().textTheme),
+      textTheme: scaledTextTheme,
       useMaterial3: true,
       scaffoldBackgroundColor: const Color(0xFF0a0a0a), // stone-950
       appBarTheme: AppBarTheme(
         backgroundColor: const Color(0xFF171717), // stone-900
         foregroundColor: Colors.white,
         titleTextStyle: GoogleFonts.nunito(
-          fontSize: 20,
+          fontSize: 22,
           fontWeight: FontWeight.w600,
           color: Colors.white,
         ),
