@@ -32,6 +32,7 @@ class SavedEvent {
 class StorageService {
   static const String _eventsKey = 'scenic-walk-organizer-events';
   static const String _broadcastingKey = 'scenic-walk-broadcasting-event';
+  static const String _eventNameKey = 'scenic-walk-broadcasting-event-name';
 
   static Future<List<SavedEvent>> getEvents() async {
     final prefs = await SharedPreferences.getInstance();
@@ -91,5 +92,20 @@ class StorageService {
   static Future<String?> getBroadcastingEvent() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_broadcastingKey);
+  }
+
+  // Store event name for background service
+  static Future<void> setEventName(String? eventName) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (eventName == null) {
+      await prefs.remove(_eventNameKey);
+    } else {
+      await prefs.setString(_eventNameKey, eventName);
+    }
+  }
+
+  static Future<String?> getEventName() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_eventNameKey);
   }
 }

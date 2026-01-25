@@ -78,6 +78,10 @@ class BackgroundService {
       currentEventId = event?['eventId'] as String?;
       currentEventName = event?['eventName'] as String?;
 
+      // Fallback: read from storage if not provided
+      currentEventId ??= await StorageService.getBroadcastingEvent();
+      currentEventName ??= await StorageService.getEventName();
+
       if (currentEventId == null) return;
 
       // Update notification
@@ -89,10 +93,37 @@ class BackgroundService {
       }
 
       // Start location tracking
-      const LocationSettings locationSettings = LocationSettings(
+      final LocationSettings locationSettings = AndroidSettings(
         accuracy: LocationAccuracy.high,
         distanceFilter: 5,
+        forceLocationManager: false,
+        intervalDuration: const Duration(seconds: 10),
+        foregroundNotificationConfig: const ForegroundNotificationConfig(
+          notificationText: "Broadcasting your location",
+          notificationTitle: "Scenic Walk",
+          enableWakeLock: true,
+        ),
       );
+
+      // Get initial position first
+      try {
+        final initialPosition = await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+        );
+
+        // Send initial position to Firebase
+        await FirebaseService.updateLocation(
+          currentEventId!,
+          LocationData(
+            lat: initialPosition.latitude,
+            lng: initialPosition.longitude,
+            timestamp: DateTime.now().millisecondsSinceEpoch,
+            accuracy: initialPosition.accuracy,
+          ),
+        );
+      } catch (e) {
+        print('Error getting initial position: $e');
+      }
 
       positionSubscription?.cancel();
       positionSubscription = Geolocator.getPositionStream(
@@ -160,13 +191,16 @@ class BackgroundService {
   static Future<void> startService(String eventId, String eventName) async {
     final service = FlutterBackgroundService();
 
-    // Save broadcasting state
+    // Save broadcasting state and event info for background service to read
     await StorageService.setBroadcastingEvent(eventId);
+    await StorageService.setEventName(eventName);
 
     // Start the service
     await service.startService();
 
-    // Send start command with event info
+    // Wait for service to be ready, then send start command
+    await Future.delayed(const Duration(milliseconds: 500));
+
     service.invoke('start', {
       'eventId': eventId,
       'eventName': eventName,
