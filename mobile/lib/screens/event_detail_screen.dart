@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
@@ -33,6 +34,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   // Map related
   GoogleMapController? _mapController;
   StreamSubscription? _liveLocationSubscription;
+  BitmapDescriptor? _organizerMarkerIcon;
 
   @override
   void initState() {
@@ -42,6 +44,89 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     _checkBackgroundPermission();
     _listenToBackgroundUpdates();
     _listenToLiveLocation();
+    _createOrganizerMarkerIcon();
+  }
+
+  Future<void> _createOrganizerMarkerIcon() async {
+    final icon = await _createCustomMarkerBitmap();
+    if (mounted) {
+      setState(() {
+        _organizerMarkerIcon = icon;
+      });
+    }
+  }
+
+  Future<BitmapDescriptor> _createCustomMarkerBitmap() async {
+    const double width = 80;
+    const double height = 100;
+
+    final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(pictureRecorder);
+
+    // Pole
+    final polePaint = Paint()
+      ..color = const Color(0xFF555555)
+      ..style = PaintingStyle.fill;
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        const Rect.fromLTWH(36, 30, 8, 70),
+        const Radius.circular(2),
+      ),
+      polePaint,
+    );
+
+    // Flag background (orange gradient effect)
+    final flagPaint = Paint()
+      ..color = const Color(0xFFFF6B00)
+      ..style = PaintingStyle.fill;
+    final flagPath = Path()
+      ..moveTo(44, 10)
+      ..lineTo(80, 15)
+      ..lineTo(80, 45)
+      ..lineTo(44, 50)
+      ..close();
+    canvas.drawPath(flagPath, flagPaint);
+
+    // Flag highlight
+    final highlightPaint = Paint()
+      ..color = const Color(0xFFFF9500)
+      ..style = PaintingStyle.fill;
+    final highlightPath = Path()
+      ..moveTo(44, 10)
+      ..lineTo(65, 12)
+      ..lineTo(65, 32)
+      ..lineTo(44, 35)
+      ..close();
+    canvas.drawPath(highlightPath, highlightPaint);
+
+    // Walking emoji text
+    final textPainter = TextPainter(
+      text: const TextSpan(
+        text: '🚶',
+        style: TextStyle(fontSize: 20),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    textPainter.paint(canvas, const Offset(52, 18));
+
+    // Bottom dot (orange with white border)
+    final dotBorderPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(const Offset(40, 95), 12, dotBorderPaint);
+
+    final dotPaint = Paint()
+      ..color = const Color(0xFFFF6B00)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(const Offset(40, 95), 9, dotPaint);
+
+    final picture = pictureRecorder.endRecording();
+    final image = await picture.toImage(width.toInt(), height.toInt());
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    final bytes = byteData!.buffer.asUint8List();
+
+    return BitmapDescriptor.bytes(bytes);
   }
 
   @override
@@ -169,12 +254,13 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       }
     }
 
-    // Organizer location marker (orange)
+    // Organizer location marker (custom orange flag)
     if (_lastPosition != null) {
       markers.add(Marker(
         markerId: const MarkerId('organizer'),
         position: LatLng(_lastPosition!.latitude, _lastPosition!.longitude),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+        icon: _organizerMarkerIcon ?? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+        anchor: const Offset(0.5, 1.0), // Anchor at bottom center
         infoWindow: const InfoWindow(title: 'Organizer'),
       ));
     }
