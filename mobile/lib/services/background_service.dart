@@ -8,6 +8,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_service.dart';
 import 'storage_service.dart';
 
+@pragma('vm:entry-point')
 class BackgroundService {
   static const String _notificationChannelId = 'scenic_walk_location';
   static const String _notificationChannelName = 'Location Broadcasting';
