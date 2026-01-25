@@ -271,12 +271,21 @@ All status indicators use icons + text labels alongside colors:
   - "My Location" button to center on current position
   - Zoom in/out controls
   - Route polyline (green) with start (green) and end (red) markers
-- **Event Detail Screen**: Map showing route + organizer location
+- **Event Detail Screen**: Map showing route + organizer location (55% screen height)
   - Custom orange flag marker with walking emoji (🚶) for organizer
   - "Center on Organizer" button
   - "Show All" button to fit route + organizer in view
   - Zoom in/out controls
   - Live location updates from Firebase
+  - Broadcasting status indicator overlay
+  - Organizer marker hidden when not broadcasting (privacy protection)
+
+### Mobile App Accessibility
+- **Large Font Sizes**: All text uses minimum 20-24px for readability
+  - Body text: 24px
+  - Labels and secondary text: 20px
+  - Button text: 24px with 80px minimum button height
+  - Status badges: 20px with icons
 
 ### Mobile App API Keys
 - **Google Maps**: Configured via `android/local.properties` (gitignored)

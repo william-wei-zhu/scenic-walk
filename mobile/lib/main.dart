@@ -108,7 +108,8 @@ class _ScenicWalkAppState extends State<ScenicWalkApp> {
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
           foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          minimumSize: const Size(0, 80),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
@@ -118,13 +119,22 @@ class _ScenicWalkAppState extends State<ScenicWalkApp> {
         style: OutlinedButton.styleFrom(
           foregroundColor: primaryColor,
           side: BorderSide(color: primaryColor),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          minimumSize: const Size(0, 80),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
         ),
       ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: primaryColor,
+          minimumSize: const Size(0, 80),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        ),
+      ),
       inputDecorationTheme: InputDecorationTheme(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
         ),
@@ -168,7 +178,8 @@ class _ScenicWalkAppState extends State<ScenicWalkApp> {
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
           foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          minimumSize: const Size(0, 80),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
@@ -178,13 +189,22 @@ class _ScenicWalkAppState extends State<ScenicWalkApp> {
         style: OutlinedButton.styleFrom(
           foregroundColor: primaryColor,
           side: BorderSide(color: primaryColor),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          minimumSize: const Size(0, 80),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
         ),
       ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: primaryColor,
+          minimumSize: const Size(0, 80),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        ),
+      ),
       inputDecorationTheme: InputDecorationTheme(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
         ),

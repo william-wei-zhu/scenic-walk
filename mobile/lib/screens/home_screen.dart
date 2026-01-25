@@ -160,15 +160,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 SliverToBoxAdapter(
                   child: Container(
                     color: Colors.orange[700],
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     child: Row(
                       children: [
-                        const Icon(Icons.wifi_off, color: Colors.white, size: 18),
+                        const Icon(Icons.wifi_off, color: Colors.white, size: 24),
                         const SizedBox(width: 8),
                         const Expanded(
                           child: Text(
                             'You\'re offline. Some features may not work.',
-                            style: TextStyle(color: Colors.white, fontSize: 13),
+                            style: TextStyle(color: Colors.white, fontSize: 20),
                           ),
                         ),
                         TextButton(
@@ -324,14 +324,17 @@ class _HomeScreenState extends State<HomeScreen> {
                           Text(
                             'No events yet',
                             style: TextStyle(
-                              fontSize: 18,
+                              fontSize: 24,
                               color: isDark ? Colors.grey[400] : Colors.grey[600],
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             'Create a new event or add an existing one to start broadcasting your location.',
-                            style: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[500]),
+                            style: TextStyle(
+                              color: isDark ? Colors.grey[500] : Colors.grey[500],
+                              fontSize: 20,
+                            ),
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -372,7 +375,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Text(
                       'Events are saved on this device only',
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 18,
                         color: isDark ? Colors.grey[600] : Colors.grey[500],
                       ),
                       textAlign: TextAlign.center,
@@ -411,7 +414,7 @@ class _SkeletonEventCard extends StatelessWidget {
             // Icon placeholder
             Container(
               width: 48,
-              height: 48,
+              height: 80,
               decoration: BoxDecoration(
                 color: baseColor,
                 borderRadius: BorderRadius.circular(12),
@@ -490,7 +493,7 @@ class _EventCard extends StatelessWidget {
                   // Status indicator with icon
                   Container(
                     width: 48,
-                    height: 48,
+                    height: 80,
                     decoration: BoxDecoration(
                       color: isBroadcasting
                           ? Colors.green.withOpacity(0.1)
@@ -532,7 +535,7 @@ class _EventCard extends StatelessWidget {
                                 event.name,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w600,
-                                  fontSize: 16,
+                                  fontSize: 24,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -542,7 +545,7 @@ class _EventCard extends StatelessWidget {
                               formatDate(event.createdAt),
                               style: TextStyle(
                                 color: isDark ? Colors.grey[500] : Colors.grey[500],
-                                fontSize: 12,
+                                fontSize: 20,
                               ),
                             ),
                           ],
@@ -597,16 +600,16 @@ class _EventCard extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.tag,
-                      size: 14,
+                      size: 20,
                       color: isDark ? Colors.grey[500] : Colors.grey[500],
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         event.id,
                         style: TextStyle(
                           color: isDark ? Colors.grey[400] : Colors.grey[600],
-                          fontSize: 13,
+                          fontSize: 20,
                           fontFamily: 'monospace',
                         ),
                       ),
@@ -621,7 +624,7 @@ class _EventCard extends StatelessWidget {
                           children: [
                             Icon(
                               Icons.copy,
-                              size: 14,
+                              size: 20,
                               color: Theme.of(context).colorScheme.primary,
                             ),
                             const SizedBox(width: 4),
@@ -629,7 +632,7 @@ class _EventCard extends StatelessWidget {
                               'Copy',
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.primary,
-                                fontSize: 12,
+                                fontSize: 20,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -662,21 +665,21 @@ class _StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: color),
-          const SizedBox(width: 4),
+          Icon(icon, size: 20, color: color),
+          const SizedBox(width: 6),
           Text(
             label,
             style: TextStyle(
               color: color,
-              fontSize: 12,
+              fontSize: 20,
               fontWeight: FontWeight.w500,
             ),
           ),

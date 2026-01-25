@@ -440,31 +440,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     );
   }
 
-  Future<void> _sendSingleUpdate() async {
-    setState(() => _errorMessage = null);
-
-    final permissionResult = await LocationService.checkPermissions();
-    if (!permissionResult.granted) {
-      setState(() => _errorMessage = permissionResult.message);
-      return;
-    }
-
-    final position = await LocationService.getCurrentPosition();
-    if (position != null) {
-      _onLocationUpdate(position);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Location updated'),
-            duration: Duration(seconds: 1),
-          ),
-        );
-      }
-    } else {
-      setState(() => _errorMessage = 'Could not get current location');
-    }
-  }
-
   void _shareEventLink() async {
     final eventUrl = AppConfig.getEventShareUrl(widget.savedEvent.id);
     final eventName = _event?.name ?? widget.savedEvent.name;
@@ -572,7 +547,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         children: [
           // Map section
           SizedBox(
-            height: MediaQuery.of(context).size.height * 0.4,
+            height: MediaQuery.of(context).size.height * 0.55,
             child: Stack(
               children: [
                 GoogleMap(
@@ -684,69 +659,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-            // Status card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: _isBroadcasting
-                    ? Colors.green.withOpacity(isDark ? 0.2 : 0.1)
-                    : isActive
-                        ? Colors.blue.withOpacity(isDark ? 0.2 : 0.1)
-                        : Colors.grey.withOpacity(isDark ? 0.2 : 0.1),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: _isBroadcasting
-                      ? Colors.green.withOpacity(0.3)
-                      : isActive
-                          ? Colors.blue.withOpacity(0.3)
-                          : Colors.grey.withOpacity(0.3),
-                ),
-              ),
-              child: Column(
-                children: [
-                  Icon(
-                    _isBroadcasting
-                        ? Icons.broadcast_on_personal
-                        : isActive
-                            ? Icons.event_available
-                            : Icons.event_busy,
-                    size: 48,
-                    color: _isBroadcasting
-                        ? Colors.green
-                        : isActive
-                            ? Colors.blue
-                            : Colors.grey,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    _isBroadcasting
-                        ? 'Broadcasting'
-                        : isActive
-                            ? 'Event Active'
-                            : 'Event Ended',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: _isBroadcasting
-                          ? (isDark ? Colors.green[300] : Colors.green[700])
-                          : isActive
-                              ? (isDark ? Colors.blue[300] : Colors.blue[700])
-                              : (isDark ? Colors.grey[400] : Colors.grey[700]),
-                    ),
-                  ),
-                  if (_isBroadcasting && _lastUpdateTime != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      'Last update: ${_formatTime(_lastUpdateTime!)}',
-                      style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600], fontSize: 13),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
             // Error message
             if (_errorMessage != null) ...[
               Container(
@@ -785,16 +697,16 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 // Stop button
                 SizedBox(
                   width: double.infinity,
-                  height: 56,
+                  height: 80,
                   child: ElevatedButton.icon(
                     onPressed: _stopBroadcasting,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
                     ),
-                    icon: const Icon(Icons.stop),
+                    icon: const Icon(Icons.stop, size: 28),
                     label: const Text(
                       'Stop Broadcasting',
-                      style: TextStyle(fontSize: 16),
+                      style: TextStyle(fontSize: 24),
                     ),
                   ),
                 ),
@@ -802,25 +714,14 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 // Start button
                 SizedBox(
                   width: double.infinity,
-                  height: 56,
+                  height: 80,
                   child: ElevatedButton.icon(
                     onPressed: _startBroadcasting,
-                    icon: const Icon(Icons.play_arrow),
+                    icon: const Icon(Icons.play_arrow, size: 28),
                     label: const Text(
                       'Start Broadcasting',
-                      style: TextStyle(fontSize: 16),
+                      style: TextStyle(fontSize: 24),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                // Single update button
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: OutlinedButton.icon(
-                    onPressed: _sendSingleUpdate,
-                    icon: const Icon(Icons.my_location),
-                    label: const Text('Send Single Update'),
                   ),
                 ),
               ],
@@ -830,7 +731,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             // Share button
             SizedBox(
               width: double.infinity,
-              height: 48,
+              height: 80,
               child: OutlinedButton.icon(
                 onPressed: _shareEventLink,
                 icon: const Icon(Icons.share),

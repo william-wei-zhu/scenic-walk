@@ -458,7 +458,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                           // Create button
                           SizedBox(
                             width: double.infinity,
-                            height: 48,
+                            height: 80,
                             child: ElevatedButton(
                               onPressed: _isCreating ? null : _createEvent,
                               child: _isCreating
