@@ -735,12 +735,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               value: _formatDate(DateTime.fromMillisecondsSinceEpoch(event.createdAt)),
               isDark: isDark,
             ),
-            if (event.route.isNotEmpty)
-              _InfoRow(
-                label: 'Route',
-                value: '${event.route.length} points',
-                isDark: isDark,
-              ),
 
             const SizedBox(height: 24),
 
@@ -784,33 +778,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     ),
                   ],
                 ),
-              ),
-            ],
-
-            // Last known position
-            if (_lastPosition != null) ...[
-              const SizedBox(height: 24),
-              Text(
-                'Last Known Position',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-              const SizedBox(height: 12),
-              _InfoRow(
-                label: 'Latitude',
-                value: _lastPosition!.latitude.toStringAsFixed(6),
-                isDark: isDark,
-              ),
-              _InfoRow(
-                label: 'Longitude',
-                value: _lastPosition!.longitude.toStringAsFixed(6),
-                isDark: isDark,
-              ),
-              _InfoRow(
-                label: 'Accuracy',
-                value: '${_lastPosition!.accuracy.toStringAsFixed(1)} m',
-                isDark: isDark,
               ),
             ],
                 ],
