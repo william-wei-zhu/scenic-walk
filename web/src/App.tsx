@@ -90,8 +90,21 @@ function App() {
       return;
     }
 
+    // Check if script already exists in DOM (hot reload protection)
+    const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+    if (existingScript) {
+      // Script exists but may not have finished loading - wait for it
+      const checkLoaded = setInterval(() => {
+        if (window.google?.maps) {
+          setMapsLoaded(true);
+          clearInterval(checkLoaded);
+        }
+      }, 100);
+      return () => clearInterval(checkLoaded);
+    }
+
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,marker&v=weekly`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&v=weekly&loading=async`;
     script.async = true;
     script.defer = true;
 

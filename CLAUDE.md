@@ -142,7 +142,17 @@ VITE_FIREBASE_MESSAGING_SENDER_ID=
 VITE_FIREBASE_APP_ID=
 VITE_FIREBASE_DATABASE_URL=
 VITE_GOOGLE_MAPS_API_KEY=
+VITE_GOOGLE_MAPS_MAP_ID=
 ```
+
+### Google Maps Setup
+1. Create API key at https://console.cloud.google.com/apis/credentials
+2. Enable Maps JavaScript API for the key
+3. Create Map ID at https://console.cloud.google.com/google/maps-apis/studio/maps
+   - Choose **JavaScript** as map type
+   - Choose **Vector** (recommended)
+   - Disable tilt/rotation for simpler UX
+4. Add allowed referrers to API key (e.g., `http://localhost:*`, your production domain)
 
 ## Deployment
 

@@ -73,10 +73,12 @@ export const WalkMapComponent: React.FC<WalkMapComponentProps> = ({
         const { Map } = await google.maps.importLibrary('maps') as google.maps.MapsLibrary;
         await google.maps.importLibrary('marker');
 
+        const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID;
+
         const map = new Map(mapRef.current!, {
           center: DEFAULT_CENTER,
           zoom: DEFAULT_ZOOM,
-          mapId: 'walk-tracker-map',
+          mapId: mapId,
           disableDefaultUI: false,
           zoomControl: true,
           mapTypeControl: false,
@@ -153,15 +155,18 @@ export const WalkMapComponent: React.FC<WalkMapComponentProps> = ({
       }
     }
 
-    // Fit bounds to show entire route
-    if (route.length > 1) {
-      const bounds = new google.maps.LatLngBounds();
-      route.forEach(point => bounds.extend(point));
-      mapInstanceRef.current.fitBounds(bounds, 50);
-    } else if (route.length === 1) {
-      mapInstanceRef.current.setCenter(route[0]);
+    // Only auto-fit bounds when NOT in drawing mode (i.e., when viewing an existing route)
+    // During drawing mode, let the user control the map view
+    if (!isDrawingMode) {
+      if (route.length > 1) {
+        const bounds = new google.maps.LatLngBounds();
+        route.forEach(point => bounds.extend(point));
+        mapInstanceRef.current.fitBounds(bounds, 50);
+      } else if (route.length === 1) {
+        mapInstanceRef.current.setCenter(route[0]);
+      }
     }
-  }, [route, isMapReady]);
+  }, [route, isMapReady, isDrawingMode]);
 
   // Update organizer marker
   useEffect(() => {
