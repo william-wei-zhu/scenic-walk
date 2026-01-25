@@ -2,6 +2,8 @@
 
 Flutter Android app for event organizers to broadcast their live GPS location to participants.
 
+Features the cute hiking goat mascot as the app icon.
+
 ## Features
 
 - **Create Events** - Draw routes on an interactive map with tap-to-add points
