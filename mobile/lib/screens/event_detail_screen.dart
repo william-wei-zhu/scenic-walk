@@ -262,8 +262,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       }
     }
 
-    // Organizer location marker (custom orange flag)
-    if (_lastPosition != null) {
+    // Organizer location marker (custom orange flag) - only show when broadcasting
+    if (_lastPosition != null && _isBroadcasting) {
       markers.add(Marker(
         markerId: const MarkerId('organizer'),
         position: LatLng(_lastPosition!.latitude, _lastPosition!.longitude),
@@ -411,6 +411,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
 
   Future<void> _stopBroadcasting() async {
     await BackgroundService.stopService();
+    // Clear location from Firebase to protect privacy
+    await FirebaseService.clearLocation(widget.savedEvent.id);
     setState(() {
       _isBroadcasting = false;
       _lastPosition = null;
@@ -587,14 +589,15 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   left: 12,
                   child: Column(
                     children: [
-                      if (_lastPosition != null)
+                      if (_lastPosition != null && _isBroadcasting)
                         _MapButton(
                           onPressed: _centerOnOrganizer,
                           icon: Icons.person_pin_circle,
                           label: 'Center on Organizer',
                           isPrimary: true,
                         ),
-                      const SizedBox(height: 8),
+                      if (_lastPosition != null && _isBroadcasting)
+                        const SizedBox(height: 8),
                       _MapButton(
                         onPressed: _fitBoundsToAll,
                         icon: Icons.zoom_out_map,
@@ -622,40 +625,43 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     ],
                   ),
                 ),
-                // Broadcasting indicator overlay
-                if (_isBroadcasting)
-                  Positioned(
-                    top: 12,
-                    right: 12,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.green,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 4,
+                // Broadcasting status indicator overlay
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: _isBroadcasting ? Colors.green : Colors.grey[700],
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          _isBroadcasting ? Icons.broadcast_on_personal : Icons.broadcast_on_personal_outlined,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          _isBroadcasting ? 'Broadcasting' : 'Not Broadcasting',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
                           ),
-                        ],
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.broadcast_on_personal, color: Colors.white, size: 16),
-                          SizedBox(width: 4),
-                          Text(
-                            'Broadcasting',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
+                ),
               ],
             ),
           ),

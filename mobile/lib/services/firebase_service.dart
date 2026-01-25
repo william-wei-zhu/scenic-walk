@@ -111,6 +111,17 @@ class FirebaseService {
     }
   }
 
+  /// Clear location for an event (privacy protection when stopping broadcast)
+  static Future<bool> clearLocation(String eventId) async {
+    try {
+      await _database.child('locations/$eventId').remove();
+      return true;
+    } catch (e) {
+      print('Error clearing location: $e');
+      return false;
+    }
+  }
+
   /// Listen to location updates for an event
   static Stream<LocationData?> listenToLocation(String eventId) {
     return _database.child('locations/$eventId').onValue.map((event) {
