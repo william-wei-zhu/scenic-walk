@@ -814,6 +814,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               const SizedBox(height: 16),
             ],
 
+            // Bottom padding for Android navigation bar
+            SizedBox(height: MediaQuery.of(context).padding.bottom + 24),
                 ],
               ),
             ),
