@@ -728,26 +728,32 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               const SizedBox(height: 24),
             ],
 
-            // Share button
-            SizedBox(
-              width: double.infinity,
-              height: 80,
-              child: OutlinedButton.icon(
-                onPressed: _shareEventLink,
-                icon: const Icon(Icons.share),
-                label: const Text('Share Event Link'),
+            // Permission reminder
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(isDark ? 0.15 : 0.08),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, color: isDark ? Colors.blue[300] : Colors.blue[700], size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'For broadcasting to work, allow Location (Always) and Notifications in your phone settings.',
+                      style: TextStyle(
+                        color: isDark ? Colors.blue[200] : Colors.blue[800],
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
 
             // Event info
-            Text(
-              'Event Details',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-            const SizedBox(height: 12),
             _InfoRow(
               label: 'Event ID',
               value: event.id,
@@ -761,14 +767,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               isDark: isDark,
               isLink: true,
             ),
-            _InfoRow(
-              label: 'Status',
-              value: isActive ? 'Active' : 'Ended',
-              valueColor: isActive ? Colors.green : Colors.grey,
-              isDark: isDark,
-            ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
 
             // Background permission info
             if (!_hasBackgroundPermission && isActive) ...[

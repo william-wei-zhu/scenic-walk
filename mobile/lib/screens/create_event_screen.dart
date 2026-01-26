@@ -473,6 +473,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                                   : const Text('Create Event'),
                             ),
                           ),
+                          // Bottom padding for Android navigation bar
+                          SizedBox(height: MediaQuery.of(context).padding.bottom + 24),
                         ],
                       ),
                     ),
