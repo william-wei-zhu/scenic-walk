@@ -12,6 +12,7 @@ Create walking events, draw routes on a map, and share your live location with p
 - **Easy Sharing** - Simple shareable links, no app downloads required
 - **Organizer PIN** - Secure access for event organizers
 - **My Events** - Return to your events anytime (saved locally on device)
+- **Delete Events** - Permanently delete events from the database
 - **Dark Mode** - Full dark theme support
 - **Mobile Responsive** - Works on phones, tablets, and desktops
 - **Advanced Markers** - Custom orange flag marker with walking emoji for organizer location
@@ -19,6 +20,7 @@ Create walking events, draw routes on a map, and share your live location with p
 ### Android App (Organizers)
 - **Create Events** - Draw routes directly on an interactive map
 - **Background Broadcasting** - Location updates continue when app is backgrounded or screen locked
+- **Delete Events** - Permanently delete events from the database
 - **Custom Organizer Marker** - Orange flag with walking emoji (matches web)
 - **Map Controls** - Zoom in/out, center on location, show all
 - **My Location Button** - Quick navigation to current position

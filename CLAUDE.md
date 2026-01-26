@@ -222,6 +222,7 @@ Organizers can return to their events after closing the browser:
 - Homepage shows "My Events" list with status badges (Active/Ended)
 - Clicking an event auto-verifies PIN (skips modal) using stored PIN
 - Events are device-specific (not synced across devices)
+- **Delete button** (trash icon) permanently deletes event from database with confirmation
 
 ```typescript
 // organizerStorage.ts
@@ -237,6 +238,13 @@ saveOrganizerEvent(event: SavedEvent): void
 removeOrganizerEvent(eventId: string): void
 getStoredPin(eventId: string): string | null
 ```
+
+### Event Deletion
+- **Permanent deletion**: Organizers can delete events from the database (not just remove from local list)
+- **Delete button**: Red trash icon on event cards (replaces the old X button)
+- **Confirmation dialog**: Simple "Are you sure?" prompt (no PIN required)
+- **Deletes both**: Event data and associated location data from Firebase
+- **Available on**: Both web and mobile apps
 
 ### Location Broadcasting
 - **Continuous mode**: Auto-updates location every ~10 seconds while broadcasting
