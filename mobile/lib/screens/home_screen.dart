@@ -69,31 +69,70 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Future<void> _removeEvent(String eventId) async {
+  Future<void> _deleteEvent(SavedEvent event) async {
+    bool isDeleting = false;
+
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Remove Event'),
-        content: const Text(
-          'Are you sure you want to remove this event from your list? '
-          'This will not delete the event itself.',
+      barrierDismissible: false,
+      builder: (context) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => AlertDialog(
+          title: const Text('Delete Event'),
+          content: const Text(
+            'This will permanently delete the event from the server. '
+            'All participants will lose access.\n\n'
+            'Are you sure you want to delete this event?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: isDeleting ? null : () => Navigator.pop(dialogContext, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: isDeleting
+                  ? null
+                  : () async {
+                      setDialogState(() => isDeleting = true);
+
+                      // Delete from Firebase
+                      final success = await FirebaseService.deleteEvent(event.id);
+
+                      if (!dialogContext.mounted) return;
+
+                      if (success) {
+                        // Remove from local storage
+                        await StorageService.removeEvent(event.id);
+                        Navigator.pop(dialogContext, true);
+                      } else {
+                        setDialogState(() => isDeleting = false);
+                        if (dialogContext.mounted) {
+                          ScaffoldMessenger.of(dialogContext).showSnackBar(
+                            const SnackBar(content: Text('Failed to delete. Please try again.')),
+                          );
+                        }
+                      }
+                    },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: isDeleting
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Delete'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Remove'),
-          ),
-        ],
       ),
     );
 
-    if (confirmed == true) {
-      await StorageService.removeEvent(eventId);
+    if (confirmed == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Event deleted'),
+          backgroundColor: Colors.green,
+        ),
+      );
       _loadEvents();
     }
   }
@@ -357,7 +396,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           details: details,
                           isBroadcasting: isBroadcasting,
                           onTap: () => _navigateToEventDetail(event),
-                          onRemove: () => _removeEvent(event.id),
+                          onDelete: () => _deleteEvent(event),
                           onCopyId: () => _copyEventId(event.id),
                           formatDate: _formatDate,
                         );
@@ -458,7 +497,7 @@ class _EventCard extends StatelessWidget {
   final WalkEvent? details;
   final bool isBroadcasting;
   final VoidCallback onTap;
-  final VoidCallback onRemove;
+  final VoidCallback onDelete;
   final VoidCallback onCopyId;
   final String Function(int) formatDate;
 
@@ -467,7 +506,7 @@ class _EventCard extends StatelessWidget {
     required this.details,
     required this.isBroadcasting,
     required this.onTap,
-    required this.onRemove,
+    required this.onDelete,
     required this.onCopyId,
     required this.formatDate,
   });
@@ -579,11 +618,12 @@ class _EventCard extends StatelessWidget {
                     ),
                   ),
 
-                  // Remove button
+                  // Delete button
                   IconButton(
-                    onPressed: onRemove,
-                    icon: const Icon(Icons.close, size: 20),
-                    color: isDark ? Colors.grey[500] : Colors.grey[400],
+                    onPressed: onDelete,
+                    icon: const Icon(Icons.delete_outline, size: 22),
+                    color: Colors.red[400],
+                    tooltip: 'Delete event',
                   ),
                 ],
               ),

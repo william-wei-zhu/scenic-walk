@@ -811,7 +811,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   ],
                 ),
               ),
+              const SizedBox(height: 16),
             ],
+
                 ],
               ),
             ),

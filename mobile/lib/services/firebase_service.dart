@@ -169,4 +169,19 @@ class FirebaseService {
       return false;
     }
   }
+
+  /// Delete an event permanently (removes from database)
+  static Future<bool> deleteEvent(String eventId) async {
+    try {
+      // Delete both the event and its location data
+      await Future.wait([
+        _database.child('events/$eventId').remove(),
+        _database.child('locations/$eventId').remove(),
+      ]);
+      return true;
+    } catch (e) {
+      print('Error deleting event: $e');
+      return false;
+    }
+  }
 }

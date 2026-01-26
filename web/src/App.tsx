@@ -1,7 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import { getOrganizerEvents, removeOrganizerEvent, type SavedEvent } from './services/organizerStorage';
-import { getWalkEvent } from './services/firebase';
+import { getWalkEvent, deleteWalkEvent } from './services/firebase';
 
 // Lazy load components for code splitting
 const CreateWalkEvent = lazy(() => import('./components/CreateWalkEvent'));
@@ -201,6 +201,7 @@ interface HomePageProps {
 function HomePage({ onCreateEvent, isDarkMode, onToggleDarkMode }: HomePageProps) {
   const [savedEvents, setSavedEvents] = useState<SavedEvent[]>([]);
   const [eventStatuses, setEventStatuses] = useState<Record<string, 'active' | 'ended' | 'loading'>>({});
+  const [deleteModal, setDeleteModal] = useState<{ event: SavedEvent; isDeleting: boolean } | null>(null);
 
   // Load saved events on mount
   useEffect(() => {
@@ -222,9 +223,20 @@ function HomePage({ onCreateEvent, isDarkMode, onToggleDarkMode }: HomePageProps
     });
   }, []);
 
-  const handleRemoveEvent = (eventId: string) => {
-    removeOrganizerEvent(eventId);
-    setSavedEvents(prev => prev.filter(e => e.id !== eventId));
+  const handleDeleteEvent = async () => {
+    if (!deleteModal) return;
+
+    setDeleteModal(prev => prev ? { ...prev, isDeleting: true } : null);
+
+    try {
+      await deleteWalkEvent(deleteModal.event.id);
+      removeOrganizerEvent(deleteModal.event.id);
+      setSavedEvents(prev => prev.filter(e => e.id !== deleteModal.event.id));
+      setDeleteModal(null);
+    } catch {
+      setDeleteModal(prev => prev ? { ...prev, isDeleting: false } : null);
+      alert('Failed to delete. Please try again.');
+    }
   };
 
   const formatDate = (timestamp: number) => {
@@ -307,12 +319,12 @@ function HomePage({ onCreateEvent, isDarkMode, onToggleDarkMode }: HomePageProps
                           )}
                         </button>
                         <button
-                          onClick={() => handleRemoveEvent(event.id)}
+                          onClick={() => setDeleteModal({ event, isDeleting: false })}
                           className="ml-2 p-1 text-gray-400 hover:text-red-500 transition-colors"
-                          title="Remove from list"
+                          title="Delete event"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
                         </button>
                       </div>
@@ -331,6 +343,39 @@ function HomePage({ onCreateEvent, isDarkMode, onToggleDarkMode }: HomePageProps
           )}
         </div>
       </main>
+
+      {/* Delete confirmation modal */}
+      {deleteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-sm w-full shadow-xl">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+              Delete Event
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              This will permanently delete the event from the server. All participants will lose access.
+            </p>
+            <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
+              Are you sure you want to delete this event?
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setDeleteModal(null)}
+                disabled={deleteModal.isDeleting}
+                className="flex-1 px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteEvent}
+                disabled={deleteModal.isDeleting}
+                className="flex-1 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50"
+              >
+                {deleteModal.isDeleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
