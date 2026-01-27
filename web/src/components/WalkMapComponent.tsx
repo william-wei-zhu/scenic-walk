@@ -14,6 +14,66 @@ interface WalkMapComponentProps {
 const DEFAULT_CENTER = { lat: 38.9072, lng: -77.0369 }; // Washington DC
 const DEFAULT_ZOOM = 14;
 
+// Arrow spacing constants
+const ARROW_BASE_SPACING_METERS = 150;
+const ARROW_MIN_COUNT = 3;
+const ARROW_MAX_COUNT = 20;
+const ARROW_FIRST_OFFSET_PERCENT = 30; // First arrow at 30% of first interval
+
+// Calculate the total route length in meters using Haversine formula
+function calculateRouteLength(route: Coordinates[]): number {
+  if (route.length < 2) return 0;
+
+  let totalLength = 0;
+  for (let i = 0; i < route.length - 1; i++) {
+    totalLength += haversineDistance(route[i], route[i + 1]);
+  }
+  return totalLength;
+}
+
+// Haversine distance between two points in meters
+function haversineDistance(p1: Coordinates, p2: Coordinates): number {
+  const R = 6371000; // Earth's radius in meters
+  const lat1 = (p1.lat * Math.PI) / 180;
+  const lat2 = (p2.lat * Math.PI) / 180;
+  const deltaLat = ((p2.lat - p1.lat) * Math.PI) / 180;
+  const deltaLng = ((p2.lng - p1.lng) * Math.PI) / 180;
+
+  const a =
+    Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLng / 2) * Math.sin(deltaLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return R * c;
+}
+
+// Calculate arrow repeat distance as a percentage string for Google Maps
+function calculateArrowRepeat(route: Coordinates[]): string {
+  const routeLength = calculateRouteLength(route);
+  if (routeLength === 0) return '20%';
+
+  // Calculate number of arrows based on spacing
+  let arrowCount = Math.floor(routeLength / ARROW_BASE_SPACING_METERS);
+  arrowCount = Math.max(ARROW_MIN_COUNT, Math.min(ARROW_MAX_COUNT, arrowCount));
+
+  // Convert to percentage
+  const repeatPercent = 100 / arrowCount;
+  return `${repeatPercent.toFixed(1)}%`;
+}
+
+// Calculate first arrow offset as a percentage
+function calculateArrowOffset(route: Coordinates[]): string {
+  const routeLength = calculateRouteLength(route);
+  if (routeLength === 0) return '10%';
+
+  let arrowCount = Math.floor(routeLength / ARROW_BASE_SPACING_METERS);
+  arrowCount = Math.max(ARROW_MIN_COUNT, Math.min(ARROW_MAX_COUNT, arrowCount));
+
+  const repeatPercent = 100 / arrowCount;
+  const offsetPercent = (repeatPercent * ARROW_FIRST_OFFSET_PERCENT) / 100;
+  return `${offsetPercent.toFixed(1)}%`;
+}
+
 export const WalkMapComponent: React.FC<WalkMapComponentProps> = ({
   route,
   organizerLocation,
@@ -130,7 +190,7 @@ export const WalkMapComponent: React.FC<WalkMapComponentProps> = ({
 
     if (route.length === 0) return;
 
-    // Create new polyline
+    // Create new polyline with directional arrows
     const polyline = new google.maps.Polyline({
       path: route,
       geodesic: true,
@@ -138,6 +198,18 @@ export const WalkMapComponent: React.FC<WalkMapComponentProps> = ({
       strokeOpacity: 1.0,
       strokeWeight: 4,
       map: mapInstanceRef.current,
+      icons: [{
+        icon: {
+          path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+          scale: 3,
+          strokeColor: '#ffffff',
+          strokeWeight: 2,
+          fillColor: '#16a34a',
+          fillOpacity: 1,
+        },
+        offset: calculateArrowOffset(route),
+        repeat: calculateArrowRepeat(route),
+      }],
     });
 
     polylineRef.current = polyline;

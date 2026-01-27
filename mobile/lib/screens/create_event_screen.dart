@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -5,6 +7,120 @@ import 'package:uuid/uuid.dart';
 import '../services/firebase_service.dart';
 import '../services/storage_service.dart';
 import '../services/location_service.dart';
+
+// Arrow spacing constants
+const double _arrowBaseSpacingMeters = 150;
+const int _arrowMinCount = 3;
+const int _arrowMaxCount = 20;
+const double _arrowFirstOffsetPercent = 0.30; // First arrow at 30% of first interval
+
+// Calculate Haversine distance between two points in meters
+double _calculateDistance(LatLng p1, LatLng p2) {
+  const double R = 6371000; // Earth's radius in meters
+  final double lat1 = p1.latitude * math.pi / 180;
+  final double lat2 = p2.latitude * math.pi / 180;
+  final double deltaLat = (p2.latitude - p1.latitude) * math.pi / 180;
+  final double deltaLng = (p2.longitude - p1.longitude) * math.pi / 180;
+
+  final double a = math.sin(deltaLat / 2) * math.sin(deltaLat / 2) +
+      math.cos(lat1) * math.cos(lat2) * math.sin(deltaLng / 2) * math.sin(deltaLng / 2);
+  final double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+
+  return R * c;
+}
+
+// Calculate bearing from p1 to p2 in degrees (0-360)
+double _calculateBearing(LatLng p1, LatLng p2) {
+  final double lat1 = p1.latitude * math.pi / 180;
+  final double lat2 = p2.latitude * math.pi / 180;
+  final double deltaLng = (p2.longitude - p1.longitude) * math.pi / 180;
+
+  final double y = math.sin(deltaLng) * math.cos(lat2);
+  final double x = math.cos(lat1) * math.sin(lat2) -
+      math.sin(lat1) * math.cos(lat2) * math.cos(deltaLng);
+
+  double bearing = math.atan2(y, x) * 180 / math.pi;
+  return (bearing + 360) % 360;
+}
+
+// Calculate total route length in meters
+double _calculateRouteLength(List<LatLng> route) {
+  if (route.length < 2) return 0;
+
+  double totalLength = 0;
+  for (int i = 0; i < route.length - 1; i++) {
+    totalLength += _calculateDistance(route[i], route[i + 1]);
+  }
+  return totalLength;
+}
+
+// Get point along route at given distance from start
+LatLng? _getPointAtDistance(List<LatLng> route, double targetDistance) {
+  if (route.isEmpty) return null;
+  if (targetDistance <= 0) return route.first;
+
+  double accumulated = 0;
+  for (int i = 0; i < route.length - 1; i++) {
+    final double segmentLength = _calculateDistance(route[i], route[i + 1]);
+    if (accumulated + segmentLength >= targetDistance) {
+      // Interpolate within this segment
+      final double remaining = targetDistance - accumulated;
+      final double fraction = remaining / segmentLength;
+
+      final double lat = route[i].latitude + (route[i + 1].latitude - route[i].latitude) * fraction;
+      final double lng = route[i].longitude + (route[i + 1].longitude - route[i].longitude) * fraction;
+      return LatLng(lat, lng);
+    }
+    accumulated += segmentLength;
+  }
+
+  return route.last;
+}
+
+// Get bearing at a given distance along the route
+double _getBearingAtDistance(List<LatLng> route, double targetDistance) {
+  if (route.length < 2) return 0;
+  if (targetDistance <= 0) return _calculateBearing(route[0], route[1]);
+
+  double accumulated = 0;
+  for (int i = 0; i < route.length - 1; i++) {
+    final double segmentLength = _calculateDistance(route[i], route[i + 1]);
+    if (accumulated + segmentLength >= targetDistance) {
+      return _calculateBearing(route[i], route[i + 1]);
+    }
+    accumulated += segmentLength;
+  }
+
+  return _calculateBearing(route[route.length - 2], route.last);
+}
+
+// Get list of arrow positions and rotations for a route
+List<({LatLng position, double rotation})> _getArrowPositions(List<LatLng> route) {
+  final List<({LatLng position, double rotation})> arrows = [];
+  final double routeLength = _calculateRouteLength(route);
+
+  if (routeLength < 50) return arrows; // No arrows for very short routes
+
+  // Calculate number of arrows
+  int arrowCount = (routeLength / _arrowBaseSpacingMeters).floor();
+  arrowCount = arrowCount.clamp(_arrowMinCount, _arrowMaxCount);
+
+  final double spacing = routeLength / arrowCount;
+  final double firstOffset = spacing * _arrowFirstOffsetPercent;
+
+  for (int i = 0; i < arrowCount; i++) {
+    final double distance = firstOffset + (spacing * i);
+    if (distance >= routeLength) break;
+
+    final LatLng? position = _getPointAtDistance(route, distance);
+    if (position != null) {
+      final double bearing = _getBearingAtDistance(route, distance);
+      arrows.add((position: position, rotation: bearing));
+    }
+  }
+
+  return arrows;
+}
 
 class CreateEventScreen extends StatefulWidget {
   const CreateEventScreen({super.key});
@@ -25,6 +141,10 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   bool _isCreating = false;
   bool _showPin = false;
   String? _errorMessage;
+
+  // Arrow markers for route direction
+  final Map<int, BitmapDescriptor> _arrowIconCache = {};
+  Set<Marker> _arrowMarkers = {};
 
   @override
   void initState() {
@@ -69,6 +189,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     setState(() {
       _routePoints.add(position);
     });
+    _rebuildArrowMarkers();
   }
 
   void _undoLastPoint() {
@@ -76,13 +197,93 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       setState(() {
         _routePoints.removeLast();
       });
+      _rebuildArrowMarkers();
     }
   }
 
   void _clearRoute() {
     setState(() {
       _routePoints.clear();
+      _arrowMarkers = {};
     });
+  }
+
+  Future<BitmapDescriptor> _createArrowIcon(double rotation) async {
+    // Round rotation to nearest 10 degrees for caching
+    final int roundedRotation = ((rotation / 10).round() * 10) % 360;
+
+    // Return cached icon if available
+    if (_arrowIconCache.containsKey(roundedRotation)) {
+      return _arrowIconCache[roundedRotation]!;
+    }
+
+    const double size = 24;
+    final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(pictureRecorder);
+
+    // Translate and rotate
+    canvas.translate(size / 2, size / 2);
+    canvas.rotate((roundedRotation - 90) * math.pi / 180); // Adjust for north-up
+    canvas.translate(-size / 2, -size / 2);
+
+    // Draw chevron arrow pointing right (will be rotated)
+    final Path arrowPath = Path();
+    // Chevron shape pointing right
+    arrowPath.moveTo(8, 6);
+    arrowPath.lineTo(16, 12);
+    arrowPath.lineTo(8, 18);
+    arrowPath.lineTo(10, 12);
+    arrowPath.close();
+
+    // White outline
+    final Paint outlinePaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    canvas.drawPath(arrowPath, outlinePaint);
+
+    // Green fill
+    final Paint fillPaint = Paint()
+      ..color = const Color(0xFF16a34a)
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(arrowPath, fillPaint);
+
+    final picture = pictureRecorder.endRecording();
+    final image = await picture.toImage(size.toInt(), size.toInt());
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    final bytes = byteData!.buffer.asUint8List();
+
+    final icon = BitmapDescriptor.bytes(bytes);
+    _arrowIconCache[roundedRotation] = icon;
+    return icon;
+  }
+
+  Future<void> _rebuildArrowMarkers() async {
+    if (_routePoints.length < 2) {
+      setState(() => _arrowMarkers = {});
+      return;
+    }
+
+    final arrowPositions = _getArrowPositions(_routePoints);
+    final Set<Marker> newArrowMarkers = {};
+
+    for (int i = 0; i < arrowPositions.length; i++) {
+      final arrow = arrowPositions[i];
+      final icon = await _createArrowIcon(arrow.rotation);
+
+      newArrowMarkers.add(Marker(
+        markerId: MarkerId('arrow_$i'),
+        position: arrow.position,
+        icon: icon,
+        anchor: const Offset(0.5, 0.5),
+        flat: true,
+        rotation: 0, // Rotation is baked into the icon
+      ));
+    }
+
+    if (mounted) {
+      setState(() => _arrowMarkers = newArrowMarkers);
+    }
   }
 
   Future<void> _goToCurrentLocation() async {
@@ -206,6 +407,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         ));
       }
     }
+
+    // Add arrow markers for route direction
+    markers.addAll(_arrowMarkers);
 
     return markers;
   }

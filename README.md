@@ -9,6 +9,7 @@ Create walking events, draw routes on a map, and share your live location with p
 ### Web App (Participants + Organizers)
 - **Live GPS Broadcasting** - Share your real-time location with participants
 - **Custom Route Drawing** - Plan your walk by clicking points on the map
+- **Directional Arrows** - See which way to walk with arrows along the route
 - **Easy Sharing** - Simple shareable links, no app downloads required
 - **Organizer PIN** - Secure access for event organizers
 - **My Events** - Return to your events anytime (saved locally on device)
@@ -19,6 +20,7 @@ Create walking events, draw routes on a map, and share your live location with p
 
 ### Android App (Organizers)
 - **Create Events** - Draw routes directly on an interactive map
+- **Directional Arrows** - See which way to walk with arrows along the route
 - **Background Broadcasting** - Location updates continue when app is backgrounded or screen locked
 - **Delete Events** - Permanently delete events from the database
 - **Custom Organizer Marker** - Orange flag with walking emoji (matches web)
@@ -138,7 +140,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 2. Wait for the organizer to start broadcasting
 3. The orange flag with walking emoji (🚶) shows the organizer's live location
 4. Green marker = route start, Red marker = route end
-5. Green line = planned walking route
+5. Green line with arrows = planned walking route (arrows show direction)
 
 ## Project Structure
 

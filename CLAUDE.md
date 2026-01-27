@@ -56,7 +56,7 @@ npm run lint     # Run ESLint
 - **Primary Color**: Green (`green-600` / #16a34a) - nature-inspired theme
 - **Font**: Nunito (rounded, friendly style matching the hiking goat logo)
 - **Logo**: Cute hiking goat mascot with backpack
-- **Route Line**: Green (#16a34a) on map
+- **Route Line**: Green (#16a34a) on map with directional arrows
 
 ### Routing (Hash-based)
 Routes are handled manually in `src/App.tsx` using `window.location.hash`:
@@ -274,11 +274,23 @@ All status indicators use icons + text labels alongside colors:
 - Mobile map height: 65vh, Desktop: flex-1
 - Homepage: Logo + tagline + CTA button + My Events list (if any)
 
+### Route Directional Arrows
+Both web and mobile display directional arrows along walking routes to show walking direction:
+- **Base spacing**: 150 meters between arrows
+- **Minimum arrows**: 3 (for short routes)
+- **Maximum arrows**: 20 (for long routes)
+- **First arrow offset**: 30% of first interval
+- **Visual style**: Green (#16a34a) filled chevron with white outline
+
+**Web implementation**: Uses Google Maps polyline `icons` property with `FORWARD_CLOSED_ARROW` symbol
+**Mobile implementation**: Custom arrow markers created with Canvas, cached by rotation (rounded to 10°)
+
 ### Mobile App Map Features
 - **Create Event Screen**: Interactive map for drawing routes by tapping
   - "My Location" button to center on current position
   - Zoom in/out controls
   - Route polyline (green) with start (green) and end (red) markers
+  - Directional arrows showing walking direction (updates as route is drawn)
 - **Event Detail Screen**: Map showing route + organizer location (55% screen height)
   - Custom orange flag marker with walking emoji (🚶) for organizer
   - "Center on Organizer" button
@@ -287,6 +299,7 @@ All status indicators use icons + text labels alongside colors:
   - Live location updates from Firebase
   - Broadcasting status indicator overlay
   - Organizer marker hidden when not broadcasting (privacy protection)
+  - Directional arrows along route
 
 ### Mobile App Accessibility
 - **Large Font Sizes**: All text uses minimum 20-24px for readability
