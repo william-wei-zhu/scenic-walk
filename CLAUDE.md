@@ -324,5 +324,18 @@ Both web and mobile display directional arrows along walking routes to show walk
 - **Store assets**: `mobile/store_assets/`
 - **Privacy policy**: `PRIVACY_POLICY.md` (also at repo root)
 
+### Google Play Upload Best Practices
+1. **Always bump version before building**: Update `version` in `pubspec.yaml` BEFORE running `flutter build appbundle`
+   - Format: `version: X.Y.Z+N` where `N` is the version code
+   - Version code (`+N`) must be higher than any previously uploaded build
+   - Check current version: `grep "version:" mobile/pubspec.yaml`
+2. **Build the App Bundle** (not APK) for Play Console:
+   ```bash
+   cd mobile
+   flutter build appbundle --release
+   ```
+3. **Upload location**: `mobile/build/app/outputs/bundle/release/app-release.aab`
+4. **Common error**: "Version code N has already been used" means you need to increment the version code and rebuild
+
 ### Mobile App Production URL
 Share links use `https://scenic-walk.com` (configured in `lib/config/app_config.dart`)
