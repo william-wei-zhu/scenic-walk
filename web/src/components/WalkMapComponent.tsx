@@ -1,5 +1,5 @@
 /// <reference types="google.maps" />
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useImperativeHandle, forwardRef } from 'react';
 import type { Coordinates, OrganizerLocation } from '../types';
 
 interface WalkMapComponentProps {
@@ -9,6 +9,10 @@ interface WalkMapComponentProps {
   showCenterButton?: boolean;
   onRouteChange?: (route: Coordinates[]) => void;
   onMapReady?: () => void;
+}
+
+export interface WalkMapComponentRef {
+  centerOnLocation: (lat: number, lng: number, zoom?: number) => void;
 }
 
 const DEFAULT_CENTER = { lat: 38.9072, lng: -77.0369 }; // Washington DC
@@ -74,14 +78,14 @@ function calculateArrowOffset(route: Coordinates[]): string {
   return `${offsetPercent.toFixed(1)}%`;
 }
 
-export const WalkMapComponent: React.FC<WalkMapComponentProps> = ({
+export const WalkMapComponent = forwardRef<WalkMapComponentRef, WalkMapComponentProps>(({
   route,
   organizerLocation,
   isDrawingMode = false,
   showCenterButton = false,
   onRouteChange,
   onMapReady,
-}) => {
+}, ref) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const polylineRef = useRef<google.maps.Polyline | null>(null);
@@ -90,6 +94,16 @@ export const WalkMapComponent: React.FC<WalkMapComponentProps> = ({
   const routeRef = useRef<Coordinates[]>(route);
   const [isMapReady, setIsMapReady] = useState(false);
   const hasAutoFitRef = useRef(false);
+
+  // Expose centerOnLocation method via ref
+  useImperativeHandle(ref, () => ({
+    centerOnLocation: (lat: number, lng: number, zoom: number = 16) => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.setCenter({ lat, lng });
+        mapInstanceRef.current.setZoom(zoom);
+      }
+    },
+  }), []);
 
   // Center map on organizer location
   const centerOnOrganizer = useCallback(() => {
@@ -369,7 +383,7 @@ export const WalkMapComponent: React.FC<WalkMapComponentProps> = ({
       )}
     </div>
   );
-};
+});
 
 // Helper function to create a marker with label
 function createMarker(

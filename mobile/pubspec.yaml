@@ -70,6 +70,9 @@ dependencies:
   # Network connectivity
   connectivity_plus: ^6.1.0
 
+  # HTTP client for Places API
+  http: ^1.2.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

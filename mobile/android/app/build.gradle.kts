@@ -47,7 +47,11 @@ android {
         multiDexEnabled = true
 
         // Google Maps API key from local.properties
-        manifestPlaceholders["MAPS_API_KEY"] = localProperties.getProperty("MAPS_API_KEY", "")
+        val mapsApiKey = localProperties.getProperty("MAPS_API_KEY", "")
+        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+
+        // Expose API key to Flutter for Places API
+        resValue("string", "google_maps_api_key", mapsApiKey)
     }
 
     signingConfigs {

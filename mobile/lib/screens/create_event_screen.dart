@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../services/firebase_service.dart';
 import '../services/storage_service.dart';
 import '../services/location_service.dart';
+import '../widgets/place_search_field.dart';
 
 // Arrow spacing constants
 const double _arrowBaseSpacingMeters = 150;
@@ -320,6 +321,12 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     _mapController?.animateCamera(CameraUpdate.zoomOut());
   }
 
+  void _centerOnLocation(double lat, double lng) {
+    _mapController?.animateCamera(
+      CameraUpdate.newLatLngZoom(LatLng(lat, lng), 16),
+    );
+  }
+
   Future<void> _createEvent() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -524,47 +531,57 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                           ],
                         ),
                       ),
-                      // Instructions overlay
+                      // Search bar and instructions overlay
                       Positioned(
                         top: 16,
                         left: 16,
                         right: 16,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: (isDark ? Colors.grey[900] : Colors.white)?.withOpacity(0.95),
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 4,
+                        child: Column(
+                          children: [
+                            // Place search bar
+                            PlaceSearchField(
+                              onPlaceSelected: _centerOnLocation,
+                            ),
+                            const SizedBox(height: 8),
+                            // Instructions
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
                               ),
-                            ],
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.touch_app,
-                                size: 20,
-                                color: isDark ? Colors.grey[400] : Colors.grey,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  _routePoints.isEmpty
-                                      ? 'Tap on map to draw your route'
-                                      : '${_routePoints.length} points • Tap to add more',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: isDark ? Colors.grey[300] : Colors.grey[700],
+                              decoration: BoxDecoration(
+                                color: (isDark ? Colors.grey[900] : Colors.white)?.withOpacity(0.95),
+                                borderRadius: BorderRadius.circular(8),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 4,
                                   ),
-                                ),
+                                ],
                               ),
-                            ],
-                          ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.touch_app,
+                                    size: 20,
+                                    color: isDark ? Colors.grey[400] : Colors.grey,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      _routePoints.isEmpty
+                                          ? 'Tap on map to draw your route'
+                                          : '${_routePoints.length} points • Tap to add more',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: isDark ? Colors.grey[300] : Colors.grey[700],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],

@@ -1,6 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { nanoid } from 'nanoid';
-import { WalkMapComponent } from './WalkMapComponent';
+import { WalkMapComponent, type WalkMapComponentRef } from './WalkMapComponent';
+import { PlaceSearchBar } from './PlaceSearchBar';
 import { Toast, useToast } from './Toast';
 import { createWalkEvent } from '../services/firebase';
 import { saveOrganizerEvent } from '../services/organizerStorage';
@@ -22,8 +23,16 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
   const [createdEvent, setCreatedEvent] = useState<WalkEvent | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Map ref for centering
+  const mapRef = useRef<WalkMapComponentRef>(null);
+
   // Toast notifications
   const { toast, showToast, hideToast } = useToast();
+
+  // Handle place selection from search bar
+  const handlePlaceSelected = useCallback((location: { lat: number; lng: number }) => {
+    mapRef.current?.centerOnLocation(location.lat, location.lng, 16);
+  }, []);
 
   // Handle route change from drawing
   const handleRouteChange = useCallback((newRoute: Coordinates[]) => {
@@ -180,8 +189,13 @@ export const CreateWalkEvent: React.FC<CreateWalkEventProps> = ({
           {/* Left: Map and Route Drawing */}
           <div className="space-y-4">
             <div className="bg-white dark:bg-gray-900 rounded-lg shadow overflow-hidden">
+              {/* Search bar */}
+              <div className="p-3 border-b dark:border-gray-700">
+                <PlaceSearchBar onPlaceSelected={handlePlaceSelected} />
+              </div>
               <div className="h-96 md:h-[500px]">
                 <WalkMapComponent
+                  ref={mapRef}
                   route={route}
                   isDrawingMode={true}
                   onRouteChange={handleRouteChange}
