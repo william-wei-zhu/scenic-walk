@@ -73,6 +73,7 @@ web/
 │   │   ├── CreateWalkEvent.tsx     # Event creation with route drawing + PIN
 │   │   ├── WalkEventView.tsx       # Main event view (participant/organizer)
 │   │   ├── WalkMapComponent.tsx    # Google Maps with markers + polylines
+│   │   ├── PlaceSearchBar.tsx      # Google Places autocomplete search
 │   │   ├── LocationBroadcaster.tsx # GPS broadcast controls
 │   │   ├── OrganizerPinModal.tsx   # PIN entry modal
 │   │   ├── Toast.tsx               # Toast notifications + useToast hook
@@ -102,11 +103,14 @@ mobile/
 │   │   ├── create_event_screen.dart # Create event with route drawing on map
 │   │   ├── add_event_screen.dart    # Enter event ID + PIN
 │   │   └── event_detail_screen.dart # Map view + broadcast controls
-│   └── services/
-│       ├── firebase_service.dart    # Firebase read/write + live location stream
-│       ├── storage_service.dart     # SharedPreferences for events
-│       ├── location_service.dart    # Foreground location + permissions
-│       └── background_service.dart  # Background location service
+│   ├── services/
+│   │   ├── firebase_service.dart    # Firebase read/write + live location stream
+│   │   ├── storage_service.dart     # SharedPreferences for events
+│   │   ├── location_service.dart    # Foreground location + permissions
+│   │   ├── background_service.dart  # Background location service
+│   │   └── places_service.dart      # Google Places API autocomplete
+│   └── widgets/
+│       └── place_search_field.dart  # Location search with dropdown
 ├── android/
 │   ├── app/
 │   │   ├── build.gradle.kts
@@ -151,7 +155,10 @@ VITE_GOOGLE_MAPS_MAP_ID=
 
 ### Google Maps Setup
 1. Create API key at https://console.cloud.google.com/apis/credentials
-2. Enable Maps JavaScript API for the key
+2. Enable these APIs for the key:
+   - **Maps JavaScript API** (web)
+   - **Maps SDK for Android** (mobile)
+   - **Places API (New)** (location search on both platforms)
 3. Create Map ID at https://console.cloud.google.com/google/maps-apis/studio/maps
    - Choose **JavaScript** as map type
    - Choose **Vector** (recommended)
@@ -285,8 +292,17 @@ Both web and mobile display directional arrows along walking routes to show walk
 **Web implementation**: Uses Google Maps polyline `icons` property with `FORWARD_CLOSED_ARROW` symbol
 **Mobile implementation**: Custom arrow markers created with Canvas, cached by rotation (rounded to 10°)
 
+### Location Search (Create Event)
+Both web and mobile have a location search bar on the Create Event screen:
+- **Placement**: Above the map (web) or above route instructions (mobile)
+- **Behavior**: Search centers/zooms map to selected location (does NOT add a route point)
+- **API**: Google Places Autocomplete with session tokens for billing optimization
+- **Web**: `PlaceSearchBar.tsx` using Places AutocompleteService
+- **Mobile**: `PlaceSearchField` widget calling Places API via REST
+
 ### Mobile App Map Features
 - **Create Event Screen**: Interactive map for drawing routes by tapping
+  - Location search bar to find starting location
   - "My Location" button to center on current position
   - Zoom in/out controls
   - Route polyline (green) with start (green) and end (red) markers
@@ -311,7 +327,8 @@ Both web and mobile display directional arrows along walking routes to show walk
 
 ### Mobile App API Keys
 - **Google Maps**: Configured via `android/local.properties` (gitignored)
-  - Requires "Maps SDK for Android" enabled
+  - Requires "Maps SDK for Android" and "Places API (New)" enabled
+  - API key exposed to Flutter via MethodChannel in `MainActivity.kt`
   - Add these SHA-1 fingerprints to API key restrictions:
     - Debug: `66:F8:64:8D:40:B9:F3:D9:85:FC:AC:67:33:5F:DC:2B:19:E4:CF:BB`
     - Release (upload key): `19:26:93:0D:C6:C2:DF:C7:A5:35:D0:64:B2:72:89:4E:F3:1B:7C:59`
