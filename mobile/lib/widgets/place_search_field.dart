@@ -73,9 +73,7 @@ class _PlaceSearchFieldState extends State<PlaceSearchField> {
     setState(() => _isLoading = true);
 
     try {
-      print('PlaceSearchField: Searching for "$query"');
       final predictions = await PlacesService.autocomplete(query);
-      print('PlaceSearchField: Got ${predictions.length} predictions');
 
       if (!mounted) return;
 
@@ -85,7 +83,6 @@ class _PlaceSearchFieldState extends State<PlaceSearchField> {
         _showDropdown = predictions.isNotEmpty;
       });
     } catch (e) {
-      print('PlaceSearchField: Error searching: $e');
       if (!mounted) return;
 
       setState(() {

@@ -327,9 +327,12 @@ Both web and mobile have a location search bar on the Create Event screen:
 
 ### Mobile App API Keys
 - **Google Maps**: Configured via `android/local.properties` (gitignored)
-  - Requires "Maps SDK for Android" and "Places API (New)" enabled
-  - API key exposed to Flutter via MethodChannel in `MainActivity.kt`
-  - Add these SHA-1 fingerprints to API key restrictions:
+  - `MAPS_API_KEY` - For Maps SDK (restricted to Android apps with SHA-1 fingerprints)
+  - `PLACES_API_KEY` - For Places API REST calls (no application restrictions, API-restricted to Places API only)
+  - Both keys exposed to Flutter via MethodChannel in `MainActivity.kt`
+  - Maps key requires "Maps SDK for Android" enabled
+  - Places key requires "Places API" (legacy) enabled
+  - Add these SHA-1 fingerprints to the Maps API key restrictions:
     - Debug: `66:F8:64:8D:40:B9:F3:D9:85:FC:AC:67:33:5F:DC:2B:19:E4:CF:BB`
     - Release (upload key): `19:26:93:0D:C6:C2:DF:C7:A5:35:D0:64:B2:72:89:4E:F3:1B:7C:59`
     - Google Play signing: `28:FA:B5:8E:D7:79:19:17:DB:DE:5E:59:B0:6F:3A:0C:BB:A0:48:B1`

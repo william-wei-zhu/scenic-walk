@@ -50,8 +50,9 @@ android {
         val mapsApiKey = localProperties.getProperty("MAPS_API_KEY", "")
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
 
-        // Expose API key to Flutter for Places API
+        // Expose API keys to Flutter
         resValue("string", "google_maps_api_key", mapsApiKey)
+        resValue("string", "google_places_api_key", localProperties.getProperty("PLACES_API_KEY", ""))
     }
 
     signingConfigs {

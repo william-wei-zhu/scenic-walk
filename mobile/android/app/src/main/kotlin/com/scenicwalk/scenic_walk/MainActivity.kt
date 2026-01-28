@@ -16,6 +16,10 @@ class MainActivity : FlutterActivity() {
                     val apiKey = getString(R.string.google_maps_api_key)
                     result.success(apiKey)
                 }
+                "getPlacesApiKey" -> {
+                    val apiKey = getString(R.string.google_places_api_key)
+                    result.success(apiKey)
+                }
                 else -> {
                     result.notImplemented()
                 }
