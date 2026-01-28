@@ -15,15 +15,18 @@ class PlacesService {
     try {
       const platform = MethodChannel('com.scenicwalk.scenic_walk/api_keys');
       _apiKey = await platform.invokeMethod<String>('getMapsApiKey');
+      print('PlacesService: Got API key via MethodChannel: ${_apiKey?.substring(0, 10)}...');
       return _apiKey;
     } catch (e) {
+      print('PlacesService: MethodChannel error: $e');
       // Fallback: try to read from bundle
       try {
         final data = await rootBundle.loadString('assets/config.json');
         final config = json.decode(data) as Map<String, dynamic>;
         _apiKey = config['mapsApiKey'] as String?;
         return _apiKey;
-      } catch (_) {
+      } catch (e2) {
+        print('PlacesService: Fallback error: $e2');
         return null;
       }
     }
@@ -56,8 +59,11 @@ class PlacesService {
   static Future<List<PlacePrediction>> autocomplete(String input) async {
     if (input.isEmpty) return [];
 
+    print('PlacesService: autocomplete called with input: $input');
+
     final apiKey = await _getApiKey();
     if (apiKey == null || apiKey.isEmpty) {
+      print('PlacesService: API key is null or empty');
       throw Exception('Google Maps API key not configured');
     }
 
@@ -70,7 +76,9 @@ class PlacesService {
       '&sessiontoken=$sessionToken',
     );
 
+    print('PlacesService: Making request to Places API');
     final response = await http.get(url);
+    print('PlacesService: Response status: ${response.statusCode}');
 
     if (response.statusCode != 200) {
       throw Exception('Places API error: ${response.statusCode}');
@@ -78,12 +86,15 @@ class PlacesService {
 
     final data = json.decode(response.body) as Map<String, dynamic>;
     final status = data['status'] as String?;
+    print('PlacesService: API status: $status');
 
     if (status != 'OK' && status != 'ZERO_RESULTS') {
+      print('PlacesService: Error message: ${data['error_message']}');
       throw Exception('Places API error: $status');
     }
 
     final predictions = data['predictions'] as List<dynamic>? ?? [];
+    print('PlacesService: Got ${predictions.length} predictions');
 
     return predictions.map((p) {
       final prediction = p as Map<String, dynamic>;

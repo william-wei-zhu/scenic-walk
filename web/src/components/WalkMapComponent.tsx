@@ -158,6 +158,7 @@ export const WalkMapComponent = forwardRef<WalkMapComponentRef, WalkMapComponent
           mapTypeControl: false,
           streetViewControl: false,
           fullscreenControl: true,
+          clickableIcons: false, // Disable POI popup cards
         });
 
         mapInstanceRef.current = map;
