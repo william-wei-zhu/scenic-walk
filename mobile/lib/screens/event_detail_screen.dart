@@ -653,13 +653,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
 
   void _shareEventLink() async {
     final eventUrl = AppConfig.getEventShareUrl(widget.savedEvent.id);
-    final eventName = _event?.name ?? widget.savedEvent.name;
 
     try {
-      await Share.share(
-        'Join my walk event "$eventName"!\n\n$eventUrl',
-        subject: 'Scenic Walk - $eventName',
-      );
+      await Share.share(eventUrl);
     } catch (e) {
       // Fallback to clipboard if share fails
       await Clipboard.setData(ClipboardData(text: eventUrl));
@@ -936,6 +932,20 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   ),
                 ),
               ],
+              const SizedBox(height: 16),
+              // Share Event Link button
+              SizedBox(
+                width: double.infinity,
+                height: 80,
+                child: OutlinedButton.icon(
+                  onPressed: _shareEventLink,
+                  icon: const Icon(Icons.share, size: 28),
+                  label: const Text(
+                    'Share Event Link',
+                    style: TextStyle(fontSize: 24),
+                  ),
+                ),
+              ),
               const SizedBox(height: 24),
             ],
 

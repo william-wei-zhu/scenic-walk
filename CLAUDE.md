@@ -300,6 +300,7 @@ Both web and mobile display directional arrows along walking routes to show walk
   - Broadcasting status indicator overlay
   - Organizer marker hidden when not broadcasting (privacy protection)
   - Directional arrows along route
+  - Large "Share Event Link" button below broadcasting controls
 
 ### Mobile App Accessibility
 - **Large Font Sizes**: All text uses minimum 20-24px for readability
