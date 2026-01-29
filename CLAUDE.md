@@ -372,6 +372,31 @@ Both web and mobile have a location search bar on the Create Event screen:
 5. **Open in Xcode**: `open ios/Runner.xcworkspace`
 6. **Configure signing**: Set your Apple Developer team in Signing & Capabilities
 
+### iOS permission_handler Configuration
+The `permission_handler` package requires explicit preprocessor macros in the Podfile to enable permission dialogs on iOS. Without these, iOS will silently return "permanently denied" without showing any dialog.
+
+The following macros are configured in `ios/Podfile`:
+```ruby
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    # ... other config ...
+
+    # Enable permissions for permission_handler
+    if target.name == 'permission_handler_apple'
+      target.build_configurations.each do |config|
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
+          '$(inherited)',
+          'PERMISSION_LOCATION=1',
+          'PERMISSION_NOTIFICATIONS=1',
+        ]
+      end
+    end
+  end
+end
+```
+
+**Important**: If you add new permissions, you must add the corresponding macro (e.g., `PERMISSION_CAMERA=1`) and run `pod install` again.
+
 ### iOS vs Android Differences
 | Feature | Android | iOS |
 |---------|---------|-----|
@@ -380,6 +405,7 @@ Both web and mobile have a location search bar on the Create Event screen:
 | Background permission re-request | Can re-request via system dialog | Guide to Settings if user has "While Using" but not "Always" |
 | Foreground service notification | Required (visible) | Not required |
 | Bundle ID | `com.scenicwalk.scenic_walk` | `com.scenicwalk.scenicWalk` |
+| permission_handler setup | Just works | Requires Podfile macros (see above) |
 
 ### Google Play Store
 - **Package name**: `com.scenicwalk.scenic_walk`

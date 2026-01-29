@@ -18,7 +18,44 @@ class LocationService {
       );
     }
 
-    // Check location permission
+    if (Platform.isIOS) {
+      // On iOS, use permission_handler to check status accurately
+      // This avoids triggering unnecessary permission dialogs
+      final alwaysStatus = await Permission.locationAlways.status;
+      if (alwaysStatus.isGranted) {
+        return LocationPermissionResult(granted: true);
+      }
+
+      final whenInUseStatus = await Permission.locationWhenInUse.status;
+      if (whenInUseStatus.isGranted) {
+        // Has "while in use" but not "always" - still allow basic permission check to pass
+        // Background permission will be requested separately
+        return LocationPermissionResult(granted: true);
+      }
+
+      // Check if restricted (parental controls, MDM, etc.)
+      if (whenInUseStatus.isRestricted) {
+        return LocationPermissionResult(
+          granted: false,
+          message: 'Location access is restricted on this device.',
+        );
+      }
+
+      // Neither granted - request "when in use" first
+      final result = await Permission.locationWhenInUse.request();
+      if (result.isGranted) {
+        return LocationPermissionResult(granted: true);
+      }
+
+      // On iOS, any denial means user must go to Settings
+      // Don't distinguish between denied/permanentlyDenied as iOS doesn't have that concept
+      return LocationPermissionResult(
+        granted: false,
+        message: 'Location permission denied. Please enable it in Settings > Privacy > Location Services.',
+      );
+    }
+
+    // Android - use Geolocator as before
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
