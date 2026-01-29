@@ -47,9 +47,10 @@ npm run lint     # Run ESLint
 - Google Maps JavaScript API with Advanced Markers
 
 ### Tech Stack (Mobile)
-- Flutter 3.32+ (Android, iOS coming later)
+- Flutter 3.32+ (Android & iOS)
 - Firebase Realtime Database (same as web)
 - Android Foreground Service for background location
+- iOS Background Location mode
 - Key packages: `geolocator`, `flutter_background_service`, `permission_handler`
 
 ### Design System
@@ -118,6 +119,15 @@ mobile/
 │   │   └── src/main/AndroidManifest.xml
 │   ├── local.properties             # API keys (gitignored)
 │   └── build.gradle.kts
+├── ios/
+│   ├── Runner/
+│   │   ├── AppDelegate.swift        # Google Maps init + API key MethodChannel
+│   │   ├── Info.plist               # Location permissions + background modes
+│   │   ├── GoogleService-Info.plist # Firebase config (gitignored)
+│   │   └── Assets.xcassets/         # App icons
+│   ├── Config.xcconfig              # API keys (gitignored)
+│   ├── Config.xcconfig.example      # API keys template
+│   └── Podfile                      # CocoaPods dependencies
 └── pubspec.yaml
 ```
 
@@ -157,13 +167,15 @@ VITE_GOOGLE_MAPS_MAP_ID=
 1. Create API key at https://console.cloud.google.com/apis/credentials
 2. Enable these APIs for the key:
    - **Maps JavaScript API** (web)
-   - **Maps SDK for Android** (mobile)
-   - **Places API (New)** (location search on both platforms)
+   - **Maps SDK for Android** (mobile Android)
+   - **Maps SDK for iOS** (mobile iOS)
+   - **Places API** (location search on all platforms)
 3. Create Map ID at https://console.cloud.google.com/google/maps-apis/studio/maps
    - Choose **JavaScript** as map type
    - Choose **Vector** (recommended)
    - Disable tilt/rotation for simpler UX
 4. Add allowed referrers to API key (e.g., `http://localhost:*`, your production domain)
+5. For iOS, add bundle ID restriction: `com.scenicwalk.scenicWalk`
 
 ## Deployment
 
@@ -325,7 +337,7 @@ Both web and mobile have a location search bar on the Create Event screen:
   - Button text: 24px with 80px minimum button height
   - Status badges: 20px with icons
 
-### Mobile App API Keys
+### Mobile App API Keys (Android)
 - **Google Maps**: Configured via `android/local.properties` (gitignored)
   - `MAPS_API_KEY` - For Maps SDK (restricted to Android apps with SHA-1 fingerprints)
   - `PLACES_API_KEY` - For Places API REST calls (no application restrictions, API-restricted to Places API only)
@@ -337,6 +349,36 @@ Both web and mobile have a location search bar on the Create Event screen:
     - Release (upload key): `19:26:93:0D:C6:C2:DF:C7:A5:35:D0:64:B2:72:89:4E:F3:1B:7C:59`
     - Google Play signing: `28:FA:B5:8E:D7:79:19:17:DB:DE:5E:59:B0:6F:3A:0C:BB:A0:48:B1`
 - **Firebase**: `google-services.json` in `android/app/`
+
+### Mobile App API Keys (iOS)
+- **Google Maps**: Configured via `ios/Config.xcconfig` (gitignored)
+  - `MAPS_API_KEY` - For Maps SDK for iOS (restricted to iOS bundle ID)
+  - `PLACES_API_KEY` - For Places API REST calls
+  - Both keys exposed to Flutter via MethodChannel in `AppDelegate.swift`
+  - Keys are read from Info.plist which references Config.xcconfig variables
+  - Maps key requires "Maps SDK for iOS" enabled
+  - Add iOS bundle ID restriction: `com.scenicwalk.scenicWalk`
+- **Firebase**: `GoogleService-Info.plist` in `ios/Runner/` (gitignored)
+
+### iOS Setup
+1. **Copy config template**: `cp ios/Config.xcconfig.example ios/Config.xcconfig`
+2. **Add API keys** to `ios/Config.xcconfig`:
+   ```
+   MAPS_API_KEY=your_maps_api_key
+   PLACES_API_KEY=your_places_api_key
+   ```
+3. **Add Firebase config**: Download `GoogleService-Info.plist` from Firebase Console and place in `ios/Runner/`
+4. **Install pods**: `cd ios && pod install`
+5. **Open in Xcode**: `open ios/Runner.xcworkspace`
+6. **Configure signing**: Set your Apple Developer team in Signing & Capabilities
+
+### iOS vs Android Differences
+| Feature | Android | iOS |
+|---------|---------|-----|
+| Background location frequency | 10 seconds | 1-2 minutes (OS limited) |
+| Permission UI | "Allow" / "Deny" / "Only this time" | "Allow Once" / "While Using" / "Always" |
+| Foreground service notification | Required (visible) | Not required |
+| Bundle ID | `com.scenicwalk.scenic_walk` | `com.scenicwalk.scenicWalk` |
 
 ### Google Play Store
 - **Package name**: `com.scenicwalk.scenic_walk`

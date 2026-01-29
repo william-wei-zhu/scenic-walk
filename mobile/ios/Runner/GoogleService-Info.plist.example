@@ -1,0 +1,48 @@
+<!--
+  Firebase Configuration for iOS
+
+  To set up Firebase for iOS:
+  1. Go to Firebase Console: https://console.firebase.google.com/
+  2. Select your project (or create one)
+  3. Click the gear icon → Project Settings
+  4. Under "Your apps", click "Add app" → iOS
+  5. Enter your Bundle ID: com.scenicwalk.scenicWalk (or your chosen bundle ID)
+  6. Download the GoogleService-Info.plist file
+  7. Replace this example file with the downloaded GoogleService-Info.plist
+  8. The file should be placed at: ios/Runner/GoogleService-Info.plist
+
+  IMPORTANT: GoogleService-Info.plist contains sensitive information and should NOT
+  be committed to version control. It is already in .gitignore.
+-->
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>API_KEY</key>
+  <string>YOUR_API_KEY</string>
+  <key>GCM_SENDER_ID</key>
+  <string>YOUR_GCM_SENDER_ID</string>
+  <key>PLIST_VERSION</key>
+  <string>1</string>
+  <key>BUNDLE_ID</key>
+  <string>com.scenicwalk.scenicWalk</string>
+  <key>PROJECT_ID</key>
+  <string>YOUR_PROJECT_ID</string>
+  <key>STORAGE_BUCKET</key>
+  <string>YOUR_STORAGE_BUCKET</string>
+  <key>IS_ADS_ENABLED</key>
+  <false/>
+  <key>IS_ANALYTICS_ENABLED</key>
+  <false/>
+  <key>IS_APPINVITE_ENABLED</key>
+  <true/>
+  <key>IS_GCM_ENABLED</key>
+  <true/>
+  <key>IS_SIGNIN_ENABLED</key>
+  <true/>
+  <key>GOOGLE_APP_ID</key>
+  <string>YOUR_GOOGLE_APP_ID</string>
+  <key>DATABASE_URL</key>
+  <string>YOUR_DATABASE_URL</string>
+</dict>
+</plist>

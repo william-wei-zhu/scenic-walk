@@ -1,0 +1,9 @@
+// API Keys for Scenic Walk iOS
+// Copy this file to Config.xcconfig and fill in your API keys
+// Config.xcconfig should NOT be committed to version control
+
+// Google Maps API Key (must have Maps SDK for iOS enabled)
+MAPS_API_KEY=YOUR_MAPS_API_KEY_HERE
+
+// Google Places API Key (must have Places API enabled)
+PLACES_API_KEY=YOUR_PLACES_API_KEY_HERE
