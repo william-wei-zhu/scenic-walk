@@ -40,10 +40,41 @@ class LocationService {
     return LocationPermissionResult(granted: true);
   }
 
-  /// Request background location permission (Android only)
+  /// Request background location permission
+  /// On iOS, avoids re-requesting if user has already responded to the "Always" prompt
   static Future<bool> requestBackgroundPermission() async {
-    final status = await Permission.locationAlways.request();
-    return status.isGranted;
+    if (Platform.isIOS) {
+      // On iOS, check current status first
+      final status = await Permission.locationAlways.status;
+
+      // If already granted, we're done
+      if (status.isGranted) {
+        return true;
+      }
+
+      // If permanently denied or restricted, can't request again
+      if (status.isPermanentlyDenied || status.isRestricted) {
+        return false;
+      }
+
+      // Check if user has "while in use" - if so, they've seen the prompt
+      // and chose not to grant "always". Don't re-request, guide to settings.
+      final whileInUse = await Permission.locationWhenInUse.status;
+      if (whileInUse.isGranted && status.isDenied) {
+        // User has foreground permission but denied/skipped "always"
+        // On iOS, re-requesting will show the dialog again which is annoying
+        // Return false and let the UI guide them to Settings
+        return false;
+      }
+
+      // First time requesting - go ahead
+      final result = await Permission.locationAlways.request();
+      return result.isGranted;
+    } else {
+      // Android - original behavior
+      final status = await Permission.locationAlways.request();
+      return status.isGranted;
+    }
   }
 
   /// Check if background location is granted

@@ -377,6 +377,7 @@ Both web and mobile have a location search bar on the Create Event screen:
 |---------|---------|-----|
 | Background location frequency | 10 seconds | 1-2 minutes (OS limited) |
 | Permission UI | "Allow" / "Deny" / "Only this time" | "Allow Once" / "While Using" / "Always" |
+| Background permission re-request | Can re-request via system dialog | Guide to Settings if user has "While Using" but not "Always" |
 | Foreground service notification | Required (visible) | Not required |
 | Bundle ID | `com.scenicwalk.scenic_walk` | `com.scenicwalk.scenicWalk` |
 

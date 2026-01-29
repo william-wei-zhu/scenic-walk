@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -559,11 +560,11 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Background Location'),
-        content: const Text(
-          'To broadcast your location when the app is in the background or your phone is locked, '
-          'please allow "Allow all the time" in location settings.\n\n'
-          'This is required for continuous location broadcasting.',
+        title: const Text('Background Location Required'),
+        content: Text(
+          Platform.isIOS
+              ? 'To broadcast your location while walking, please go to Settings > Scenic Walk > Location and select "Always".'
+              : 'Background location permission is required to broadcast your location during the walk. Please grant "Allow all the time" permission.',
         ),
         actions: [
           TextButton(
