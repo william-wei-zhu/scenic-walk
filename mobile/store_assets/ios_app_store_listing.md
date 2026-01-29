@@ -53,20 +53,34 @@ walking,hiking,GPS,group walk,live location,route,trail,walking club,community,o
 - **Privacy Policy URL**: https://github.com/william-wei-zhu/scenic-walk/blob/main/PRIVACY_POLICY.md
 - **Marketing URL** (optional): https://scenic-walk.com
 
-## What's New (Version 1.0.9)
-Initial release on the App Store.
+## What's New (Version 1.0.11)
+- Fixed iOS location permission popup bug that caused repeated permission prompts
+- Improved permission handling for smoother user experience
 
-- Create walking events with custom drawn routes
-- Real-time GPS location broadcasting
-- Share events via link for easy participant access
-- Beautiful hiking goat mascot logo
+## Screenshots
+Screenshots are stored in `store_assets/ios_screenshots/`:
+- `iPhone 17 Pro Max/` - 8 screenshots (1320 x 2868px)
+- `iPhone 16e/` - 8 screenshots (1170 x 2532px)
+- `iPad Pro 13-inch/` - 4 screenshots
 
-## Screenshots Needed
-1. Home screen with "My Events" (if any)
-2. Create Event screen with route drawn on map
-3. Event Detail screen showing map with route
-4. Broadcasting active with location on map
-5. Share event screen/link
+## App Privacy
+
+### Data Collected
+
+| Data Type | Purpose | Linked to Identity | Used for Tracking |
+|-----------|---------|-------------------|-------------------|
+| Precise Location | App Functionality | No | No |
+| Device ID | Analytics, App Functionality | No | No |
+| Product Interaction | Analytics | No | No |
+| Crash Data | App Functionality | No | No |
+| Performance Data | App Functionality | No | No |
+
+### Privacy Practices
+- **No user accounts** - No login, no personal information collected
+- **No advertising** - No ads, no ad tracking
+- **No data selling** - Data is never shared with third parties for advertising
+- **Location control** - Users control when location broadcasting starts/stops
+- **Firebase services** - Analytics and Crashlytics used for app improvement only
 
 ## App Review Notes
 This app is for walk/hike organizers to share their live location with event participants. Participants view the organizer's location through a web browser - they don't need to install this app.
