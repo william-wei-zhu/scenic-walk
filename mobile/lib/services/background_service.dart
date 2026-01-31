@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
@@ -92,18 +93,30 @@ class BackgroundService {
         );
       }
 
-      // Start location tracking
-      final LocationSettings locationSettings = AndroidSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 5,
-        forceLocationManager: false,
-        intervalDuration: const Duration(seconds: 10),
-        foregroundNotificationConfig: const ForegroundNotificationConfig(
-          notificationText: "Broadcasting your location",
-          notificationTitle: "Scenic Walk",
-          enableWakeLock: true,
-        ),
-      );
+      // Start location tracking with platform-specific settings
+      final LocationSettings locationSettings;
+      if (Platform.isIOS) {
+        locationSettings = AppleSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 5,
+          activityType: ActivityType.fitness,
+          pauseLocationUpdatesAutomatically: false,
+          showBackgroundLocationIndicator: true,
+          allowBackgroundLocationUpdates: true,
+        );
+      } else {
+        locationSettings = AndroidSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 5,
+          forceLocationManager: false,
+          intervalDuration: const Duration(seconds: 10),
+          foregroundNotificationConfig: const ForegroundNotificationConfig(
+            notificationText: "Broadcasting your location",
+            notificationTitle: "Scenic Walk",
+            enableWakeLock: true,
+          ),
+        );
+      }
 
       // Get initial position first
       try {
