@@ -1,26 +1,89 @@
 # Firebase Project Restoration Issue
 
-## Status: Pending Firebase Support Response
+## Status: RESOLVED - Migrated to New Firebase Project
 
 **Date Identified:** February 1, 2026
-**Support Ticket Filed:** February 1, 2026
-**Project ID:** `scenic-walk-6cde3`
-**Project Number:** `399286268646`
+**Date Resolved:** February 1, 2026
+**Original Project ID:** `scenic-walk-6cde3` (corrupted)
+**New Project ID:** `scenic-walk-484001` (active)
 
 ## Problem Summary
 
-After the Firebase project `scenic-walk-6cde3` was accidentally deleted and then restored via Google Cloud Console, the **Realtime Database** service is non-functional. The Firebase Realtime Database Management API returns a "Project has been deleted" error even though the project itself is active.
+After the Firebase project `scenic-walk-6cde3` was accidentally deleted and then restored via Google Cloud Console, the **Realtime Database** service was non-functional. The Firebase Realtime Database Management API returned a "Project has been deleted" error even though the project itself was active.
 
-## Error Details
+## Resolution
 
-**User-facing Error (Web App):**
+Instead of waiting for Firebase support to fix the corrupted project, we migrated to a new Firebase setup on the existing GCP project `scenic-walk-484001` (which also hosts the frontend deployment).
+
+### Migration Steps Performed
+
+1. **Added Firebase to existing GCP project:**
+   ```bash
+   firebase projects:addfirebase scenic-walk-484001
+   ```
+
+2. **Created Realtime Database instance:**
+   ```bash
+   # Via REST API with type: DEFAULT_DATABASE
+   POST https://firebasedatabase.googleapis.com/v1beta/projects/scenic-walk-484001/locations/us-central1/instances?databaseId=scenic-walk-484001-default-rtdb
+   ```
+
+3. **Registered apps:**
+   ```bash
+   firebase apps:create WEB "scenic-walk-web" --project scenic-walk-484001
+   firebase apps:create IOS "scenic-walk-ios" --bundle-id com.scenicwalk.scenicWalk --project scenic-walk-484001
+   firebase apps:create ANDROID "scenic-walk-android" --package-name com.scenicwalk.scenic_walk --project scenic-walk-484001
+   ```
+
+4. **Updated configuration files:**
+   - `/web/.env`
+   - `/mobile/ios/Runner/GoogleService-Info.plist`
+   - `/mobile/android/app/google-services.json`
+
+5. **Applied security rules** via REST API
+
+## New Configuration
+
+| Parameter | Value |
+|-----------|-------|
+| Project ID | `scenic-walk-484001` |
+| Project Number | `918419602814` |
+| Database URL | `https://scenic-walk-484001-default-rtdb.firebaseio.com` |
+| iOS Bundle ID | `com.scenicwalk.scenicWalk` |
+| Android Package | `com.scenicwalk.scenic_walk` |
+
+### App IDs
+| Platform | App ID |
+|----------|--------|
+| Web | `1:918419602814:web:03e4031b311ff6cc49472f` |
+| iOS | `1:918419602814:ios:392db5f292aad78c49472f` |
+| Android | `1:918419602814:android:29d9099009de266d49472f` |
+
+## Impact on Deployed Apps
+
+### Web App
+- Updated `.env` file with new Firebase config
+- Will work immediately after deployment
+
+### iOS App (App Store)
+- **Requires app update submission** to App Store
+- Current App Store version still uses old `scenic-walk-6cde3` config
+- New `GoogleService-Info.plist` has been updated in repository
+
+### Android App
+- Requires rebuild with new `google-services.json`
+- New config has been updated in repository
+
+## Original Issue Details (For Reference)
+
+### Error
 ```
 FIREBASE WARNING: Firebase error. Please ensure that you have the URL of your
 Firebase Realtime Database instance configured correctly.
 (https://scenic-walk-6cde3-default-rtdb.firebaseio.com/)
 ```
 
-**API-level Error:**
+### API Response
 ```json
 {
   "error": {
@@ -31,109 +94,21 @@ Firebase Realtime Database instance configured correctly.
 }
 ```
 
-**API Endpoint:**
-```
-GET https://firebasedatabase.googleapis.com/v1beta/projects/scenic-walk-6cde3/locations/-/instances
-```
-
-## Investigation Results
-
-| Check | Result |
-|-------|--------|
-| Google Cloud Project Status | ACTIVE |
-| Firebase project visible in `firebase projects:list` | Yes |
-| Firebase APIs enabled | All enabled |
-| `gcloud services enable firebasedatabase.googleapis.com` | Succeeded |
-| `firebase database:instances:list` | Failed (404) |
-| `firebase database:instances:create` | Failed (404) |
-| Firebase Console "Create Database" button | JavaScript error |
-
-### Console Error (Firebase Console UI)
-When attempting to create a Realtime Database via the Firebase Console:
-```
-An error has occurred
-Cannot read properties of undefined (reading '0')
-```
-
-## Root Cause
-
+### Root Cause
 When a Firebase project is restored from deletion:
 1. The Google Cloud project container is restored (works correctly)
 2. Individual Firebase services need to re-activate (partially working)
-3. **Realtime Database metadata is corrupted** - the service still believes the project is deleted
-
-This is a known issue where Firebase service-level metadata can become inconsistent after project restoration.
-
-## Impact
-
-- **Web App:** Cannot connect to Realtime Database, events cannot be created or viewed
-- **iOS App:** Cannot fetch or create events (App Store version affected)
-- **Android App:** Cannot fetch or create events
-
-## Resolution Path
-
-### Option 1: Wait for Firebase Support (CHOSEN)
-Firebase support ticket has been filed requesting they repair the Realtime Database service metadata.
-
-**Information provided to support:**
-- Project ID: `scenic-walk-6cde3`
-- Project Number: `399286268646`
-- API response showing 404 "Project has been deleted" error
-- Evidence that project is ACTIVE in Google Cloud
-
-**Expected timeline:** 1-3 business days for initial response
-
-### Option 2: Create New Firebase Project (NOT CHOSEN)
-Creating a new project would require:
-- New Firebase configuration files
-- Update web `.env` file
-- Update iOS `GoogleService-Info.plist` (requires App Store resubmission)
-- Update Android `google-services.json`
-
-**Reason not chosen:** iOS app was just approved for App Store. Creating a new project would require resubmitting the app for review.
-
-## Configuration Files (For Reference)
-
-These files contain the Firebase configuration that should work once the project is fixed:
-
-| Platform | File | Database URL |
-|----------|------|--------------|
-| Web | `/web/.env` | `https://scenic-walk-6cde3-default-rtdb.firebaseio.com` |
-| iOS | `/mobile/ios/Runner/GoogleService-Info.plist` | `https://scenic-walk-6cde3-default-rtdb.firebaseio.com` |
-| Android | `/mobile/android/app/google-services.json` | `https://scenic-walk-6cde3-default-rtdb.firebaseio.com` |
-
-## Once Firebase Support Resolves the Issue
-
-1. **Re-create Realtime Database:**
-   ```bash
-   firebase database:instances:create scenic-walk-6cde3-default-rtdb \
-     --project scenic-walk-6cde3 \
-     --location us-central1
-   ```
-   Or use Firebase Console: Build > Realtime Database > Create Database
-
-2. **Apply Security Rules:**
-   - Go to Firebase Console > Realtime Database > Rules
-   - Copy rules from `/docs/FIREBASE_SECURITY_RULES.md`
-   - Click Publish
-
-3. **Test Connectivity:**
-   ```bash
-   cd /Users/williamzhu/Desktop/working-folder/scenic-walk/web
-   npm run dev
-   ```
-   - Verify no Firebase errors in browser console
-   - Test creating an event
-
-4. **Update this document** with resolution details
+3. **Realtime Database metadata was corrupted** - the service still believed the project was deleted
 
 ## Lessons Learned
 
-1. **Enable automated backups** for Realtime Database before going to production
-2. **Document recovery procedures** for Firebase services
-3. **Consider using Firestore** instead of Realtime Database for better restoration support
-4. **Test project restoration** in a staging environment before relying on it for production
+1. **Firebase project restoration is unreliable** - Realtime Database metadata can become corrupted
+2. **Keep GCP and Firebase aligned** - Using the same project for hosting and Firebase simplifies management
+3. **Enable automated backups** for Realtime Database before going to production
+4. **Consider using Firestore** instead of Realtime Database for better restoration support
+5. **Document recovery procedures** for Firebase services
 
 ## Updates
 
-- **2026-02-01:** Issue identified, investigation completed, support ticket filed
+- **2026-02-01 (morning):** Issue identified, investigation completed, support ticket filed for `scenic-walk-6cde3`
+- **2026-02-01 (afternoon):** Migrated to new Firebase setup on `scenic-walk-484001`, all config files updated

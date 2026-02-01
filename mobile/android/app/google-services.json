@@ -1,37 +1,27 @@
 {
   "project_info": {
-    "project_number": "399286268646",
-    "firebase_url": "https://scenic-walk-6cde3-default-rtdb.firebaseio.com",
-    "project_id": "scenic-walk-6cde3",
-    "storage_bucket": "scenic-walk-6cde3.firebasestorage.app"
+    "project_number": "918419602814",
+    "firebase_url": "https://scenic-walk-484001-default-rtdb.firebaseio.com",
+    "project_id": "scenic-walk-484001",
+    "storage_bucket": "scenic-walk-484001.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:399286268646:android:5cd16878accac207490127",
+        "mobilesdk_app_id": "1:918419602814:android:29d9099009de266d49472f",
         "android_client_info": {
           "package_name": "com.scenicwalk.scenic_walk"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "399286268646-gj4ut6knapkvncvdv0ct9blhfj6trml8.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCFW9fPsDTtbFLRhN3-6pz5yhvp9V0ykVM"
+          "current_key": "AIzaSyBKkfy9LiH_7dB_1RQDM1-5N-htJn-QuPY"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "399286268646-gj4ut6knapkvncvdv0ct9blhfj6trml8.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }

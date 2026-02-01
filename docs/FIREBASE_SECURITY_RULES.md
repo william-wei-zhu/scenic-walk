@@ -142,7 +142,7 @@ For development/testing, you can use these more permissive rules:
 ## How to Deploy Rules
 
 1. Go to [Firebase Console](https://console.firebase.google.com)
-2. Select your project (scenic-walk-484001)
+2. Select project **scenic-walk-484001**
 3. Navigate to **Realtime Database** > **Rules**
 4. Replace the existing rules with the production rules above
 5. Click **Publish**
