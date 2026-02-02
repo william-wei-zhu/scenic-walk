@@ -112,3 +112,7 @@ When a Firebase project is restored from deletion:
 - **2026-02-01 (morning):** Issue identified, investigation completed, support ticket filed for `scenic-walk-6cde3`
 - **2026-02-01 (afternoon):** Migrated to new Firebase setup on `scenic-walk-484001`, all config files updated
 - **2026-02-01 (evening):** iOS v1.0.12 submitted for App Store review, Android v1.0.12 uploaded to Google Play, web app deployed
+
+## TODO
+
+- [ ] **2026-02-08:** Delete old Firebase project `scenic-walk-6cde3` after confirming all apps work correctly
