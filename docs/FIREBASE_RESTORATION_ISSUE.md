@@ -59,20 +59,19 @@ Instead of waiting for Firebase support to fix the corrupted project, we migrate
 | iOS | `1:918419602814:ios:392db5f292aad78c49472f` |
 | Android | `1:918419602814:android:29d9099009de266d49472f` |
 
-## Impact on Deployed Apps
+## Deployment Status
 
 ### Web App
-- Updated `.env` file with new Firebase config
-- Will work immediately after deployment
+- ✅ Updated `.env` file with new Firebase config
+- ✅ Deployed via CI/CD with GitHub Secrets
 
 ### iOS App (App Store)
-- **Requires app update submission** to App Store
-- Current App Store version still uses old `scenic-walk-6cde3` config
-- New `GoogleService-Info.plist` has been updated in repository
+- ✅ Updated `GoogleService-Info.plist`
+- ✅ Version 1.0.12 (build 14) submitted for App Store review on Feb 1, 2026
 
-### Android App
-- Requires rebuild with new `google-services.json`
-- New config has been updated in repository
+### Android App (Google Play)
+- ✅ Updated `google-services.json`
+- ✅ Version 1.0.12 (build 14) uploaded to Google Play
 
 ## Original Issue Details (For Reference)
 
@@ -112,3 +111,4 @@ When a Firebase project is restored from deletion:
 
 - **2026-02-01 (morning):** Issue identified, investigation completed, support ticket filed for `scenic-walk-6cde3`
 - **2026-02-01 (afternoon):** Migrated to new Firebase setup on `scenic-walk-484001`, all config files updated
+- **2026-02-01 (evening):** iOS v1.0.12 submitted for App Store review, Android v1.0.12 uploaded to Google Play, web app deployed

@@ -14,19 +14,18 @@ Copy and paste these rules into your Firebase Console at:
   "rules": {
     // Events collection
     "events": {
-      // Allow listing all events (for potential future admin features)
+      // Listing all events is denied (no admin features yet)
       ".read": false,
 
       "$eventId": {
         // Anyone can read event data (needed for participants)
         ".read": true,
 
-        // Only allow creating new events, not updating existing ones
-        // This prevents tampering with event data after creation
-        ".write": "!data.exists() && newData.exists()",
+        // Allow create, update, and delete operations
+        ".write": true,
 
-        // Validate event structure
-        ".validate": "newData.hasChildren(['id', 'name', 'organizerPin', 'route', 'status', 'createdAt'])",
+        // Validate event structure (allows deletion when newData doesn't exist)
+        ".validate": "!newData.exists() || newData.hasChildren(['id', 'name', 'organizerPin', 'route', 'status', 'createdAt'])",
 
         "id": {
           ".validate": "newData.val() == $eventId"
@@ -36,16 +35,12 @@ Copy and paste these rules into your Firebase Console at:
         },
         "organizerPin": {
           // PIN should be exactly 4 characters
-          ".validate": "newData.isString() && newData.val().length == 4",
-          // IMPORTANT: Consider hashing PINs in a future version
-          // Currently stored in plaintext for simplicity
+          ".validate": "newData.isString() && newData.val().length == 4"
         },
         "route": {
-          ".validate": "newData.isArray()"
+          ".validate": "newData.exists()"
         },
         "status": {
-          // Allow updating status (for ending events)
-          ".write": true,
           ".validate": "newData.val() == 'active' || newData.val() == 'ended'"
         },
         "createdAt": {
@@ -63,13 +58,11 @@ Copy and paste these rules into your Firebase Console at:
         // Anyone can read location (needed for participants to see organizer)
         ".read": true,
 
-        // Anyone can write location (organizer broadcasts here)
-        // In production, you might want to validate this against the event's organizerPin
-        // but that would require passing the PIN with each location update
+        // Anyone can write/delete location (organizer broadcasts here)
         ".write": true,
 
-        // Validate location structure
-        ".validate": "newData.hasChildren(['lat', 'lng', 'timestamp'])",
+        // Validate location structure (allows deletion when newData doesn't exist)
+        ".validate": "!newData.exists() || newData.hasChildren(['lat', 'lng', 'timestamp'])",
 
         "lat": {
           ".validate": "newData.isNumber() && newData.val() >= -90 && newData.val() <= 90"
@@ -127,7 +120,7 @@ For development/testing, you can use these more permissive rules:
    - Only the organizer app writes location data
    - Malicious location updates would be obvious to participants
 
-3. **Event Immutability:** Events cannot be modified after creation (except status). This prevents tampering but means organizers can't edit event names or routes.
+3. **Event Mutability:** Events can be created, updated, and deleted by anyone with the event ID. This allows organizers to manage their events but means malicious users could potentially modify events if they know the ID.
 
 ### Future Improvements
 
@@ -162,9 +155,11 @@ Use the Firebase Rules Playground in the console to test your rules:
 | Read | `/events/abc123` | Yes |
 | Read | `/events` | No |
 | Write (new) | `/events/newid` | Yes |
-| Write (update) | `/events/existing` | No |
+| Write (update) | `/events/existing` | Yes |
+| Delete | `/events/existing` | Yes |
 | Read | `/locations/abc123` | Yes |
 | Write | `/locations/abc123` | Yes |
+| Delete | `/locations/abc123` | Yes |
 | Read | `/other/path` | No |
 
 ## Monitoring
