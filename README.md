@@ -309,7 +309,3 @@ This means:
   - Release your modifications under AGPL-3.0
   - Provide access to the source code
   - Preserve copyright notices
-
-## Acknowledgments
-
-Extracted from [Scenic Guide](https://github.com/william-wei-zhu/scenic-2), an AI-powered travel companion app.
